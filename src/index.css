@@ -1,0 +1,484 @@
+@import "tailwindcss";
+
+/* =========================================================
+   TAILWIND THEME
+========================================================= */
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
+  --color-accent: #06b6d4;
+
+  --color-dark: #07090f;
+  --color-dark-light: #0c1017;
+  --color-dark-lighter: #151b27;
+  --color-dark-card: #0e1219;
+  --color-surface: #111620;
+}
+
+/* =========================================================
+   GLOBAL RESET / RESPONSIVE FOUNDATION
+========================================================= */
+
+html {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  scroll-behavior: smooth;
+
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  font-family: 'Inter', sans-serif;
+
+  background-color: #07090f;
+  color: #94a3b8;
+
+  overflow-x: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+  React root must never become wider than viewport.
+  This is especially important when using:
+  - Framer Motion transforms
+  - grids
+  - absolute elements
+  - responsive navigation
+  - 3D cards
+*/
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   BOX SIZING
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   MEDIA ELEMENTS
+========================================================= */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+/* =========================================================
+   LINKS / BUTTONS
+========================================================= */
+
+a {
+  max-width: 100%;
+}
+
+button {
+  max-width: 100%;
+  font: inherit;
+}
+
+/* Prevent long text from creating unexpected width */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+li {
+  overflow-wrap: break-word;
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07090f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* =========================================================
+   HORIZONTAL SCROLLBAR
+========================================================= */
+
+html::-webkit-scrollbar:horizontal,
+body::-webkit-scrollbar:horizontal,
+#root::-webkit-scrollbar:horizontal {
+  display: none;
+}
+
+/* =========================================================
+   GLASS
+========================================================= */
+
+.glass {
+  background: rgba(11, 15, 23, 0.7);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.glass-light {
+  background: rgba(21, 27, 39, 0.5);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* =========================================================
+   TEXT GRADIENT
+========================================================= */
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    #818cf8,
+    #06b6d4
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-subtle {
+  background: linear-gradient(
+    135deg,
+    #e2e8f0,
+    #94a3b8
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+  background: rgba(99, 102, 241, 0.25);
+  color: #fff;
+}
+
+/* =========================================================
+   GLOW
+========================================================= */
+
+.glow-sm {
+  box-shadow:
+    0 0 30px rgba(99, 102, 241, 0.08);
+}
+
+/* =========================================================
+   NOISE
+========================================================= */
+
+.noise {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.noise::before {
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+
+  background-repeat: repeat;
+  background-size: 256px 256px;
+
+  pointer-events: none;
+
+  z-index: 0;
+}
+
+/* =========================================================
+   VIDEO
+========================================================= */
+
+.video-container {
+  position: relative;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  border-radius: 1.25rem;
+
+  overflow: hidden;
+}
+
+.video-container::after {
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius: 1.25rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   ANIMATED GRID BACKGROUND
+========================================================= */
+
+.grid-bg {
+  width: 100%;
+  max-width: 100%;
+
+  background-size: 60px 60px;
+
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px
+    );
+}
+
+/* =========================================================
+   MASK FADE EDGES
+========================================================= */
+
+.mask-radial {
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 70% 60% at 50% 50%,
+      black 40%,
+      transparent 100%
+    );
+
+  mask-image:
+    radial-gradient(
+      ellipse 70% 60% at 50% 50%,
+      black 40%,
+      transparent 100%
+    );
+}
+
+/* =========================================================
+   SPOTLIGHT HOVER GLOW
+========================================================= */
+
+.card-spotlight {
+  position: relative;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+}
+
+.card-spotlight::before {
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    radial-gradient(
+      600px circle at
+      var(--mouse-x, 50%)
+      var(--mouse-y, 50%),
+      rgba(99, 102, 241, 0.04),
+      transparent 40%
+    );
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transition: opacity 0.4s;
+}
+
+.card-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* =========================================================
+   HORIZONTAL ACCENT LINE
+========================================================= */
+
+.hr-accent {
+  width: 100%;
+  max-width: 100%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(99, 102, 241, 0.15),
+      transparent
+    );
+}
+
+/* =========================================================
+   LINE CLAMP
+========================================================= */
+
+.line-clamp-3 {
+  display: -webkit-box;
+
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   RESPONSIVE SAFETY
+========================================================= */
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    overflow-x: hidden;
+  }
+
+  /*
+    Prevent transformed elements from creating
+    unwanted horizontal scrolling.
+  */
+
+  section,
+  main,
+  header,
+  footer,
+  nav {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+/* =========================================================
+   TOUCH DEVICES
+========================================================= */
+
+@media (hover: none), (pointer: coarse) {
+  .card-spotlight::before {
+    display: none;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 359px) {
+  body {
+    font-size: 14px;
+  }
+}
