@@ -275,19 +275,7 @@ export default function Hero() {
               </motion.a>
 
               {/* View Resume — opens in new tab, no download */}
-              <motion.a
-                href={RESUME_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.04, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-5 py-2.5 text-[13px] font-semibold text-slate-300 transition-all hover:border-white/[0.18] hover:text-white sm:px-6 sm:py-3"
-              >
-                <ExternalLink size={15} />
-                <span>View Resume</span>
-              </motion.a>
-            </motion.div>
-
+            
             {/* SOCIAL ICONS */}
             <motion.div
               variants={fadeUp(0.9)}
