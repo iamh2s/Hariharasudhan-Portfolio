@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 /* =========================================================
    CONSTANTS
@@ -8,8 +13,8 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 
 const PERSONAL_VIDEO = '/hero-video.mp4';
 const GITHUB_URL = 'https://github.com/iamh2s';
-const LINKEDIN_URL = 'https://www.linkedin.com/in/hariharasudhan01112004/';
-const RESUME_URL = '/Hariharasudhan_AIML_Resume_final.pdf';
+const LINKEDIN_URL =
+  'https://www.linkedin.com/in/hariharasudhan01112004/';
 
 const ROLES = [
   'AI Engineer',
@@ -74,7 +79,11 @@ function fadeUp(delay: number) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { delay, duration: 0.65, ease: 'easeOut' as const },
+      transition: {
+        delay,
+        duration: 0.65,
+        ease: 'easeOut' as const,
+      },
     },
   };
 }
@@ -117,9 +126,13 @@ function TypingRole() {
   return (
     <span className="text-primary-light">
       {text}
+
       <motion.span
         animate={{ opacity: [1, 0] }}
-        transition={{ repeat: Infinity, duration: 0.6 }}
+        transition={{
+          repeat: Infinity,
+          duration: 0.6,
+        }}
         className="ml-0.5 inline-block h-[1em] w-[2px] bg-primary-light align-middle"
       />
     </span>
@@ -134,22 +147,51 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 200, damping: 20 });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-6, 6]), { stiffness: 200, damping: 20 });
+  const rotateX = useSpring(
+    useTransform(y, [-0.5, 0.5], [6, -6]),
+    {
+      stiffness: 200,
+      damping: 20,
+    }
+  );
 
-  const handleMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    x.set((event.clientX - rect.left) / rect.width - 0.5);
-    y.set((event.clientY - rect.top) / rect.height - 0.5);
+  const rotateY = useSpring(
+    useTransform(x, [-0.5, 0.5], [-6, 6]),
+    {
+      stiffness: 200,
+      damping: 20,
+    }
+  );
+
+  const handleMove = (
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    x.set(
+      (event.clientX - rect.left) / rect.width - 0.5
+    );
+
+    y.set(
+      (event.clientY - rect.top) / rect.height - 0.5
+    );
   };
 
-  const handleLeave = () => { x.set(0); y.set(0); };
+  const handleLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
     <motion.div
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      style={{
+        rotateX,
+        rotateY,
+        transformPerspective: 800,
+      }}
     >
       {children}
     </motion.div>
@@ -164,7 +206,11 @@ export default function Hero() {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setStarted(true), 3000);
+    const timer = setTimeout(
+      () => setStarted(true),
+      3000
+    );
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -176,6 +222,7 @@ export default function Hero() {
       {/* BACKGROUND */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[45%] top-0 hidden h-full w-px bg-white/[0.02] lg:block" />
+
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
       </div>
 
@@ -186,25 +233,52 @@ export default function Hero() {
           {/* LEFT CONTENT */}
           <motion.div
             className="order-1 flex flex-col justify-center"
-            initial={{ opacity: 0, y: 40 }}
-            animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 0.9, ease: 'easeOut' }}
+            initial={{
+              opacity: 0,
+              y: 40,
+            }}
+            animate={
+              started
+                ? {
+                    opacity: 1,
+                    y: 0,
+                  }
+                : {
+                    opacity: 0,
+                    y: 40,
+                  }
+            }
+            transition={{
+              duration: 0.9,
+              ease: 'easeOut',
+            }}
           >
+
             {/* STATUS */}
             <motion.div
               variants={fadeUp(0.2)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="mb-5"
             >
               <motion.span
-                whileHover={{ scale: 1.03, borderColor: 'rgba(255,255,255,0.12)' }}
+                whileHover={{
+                  scale: 1.03,
+                  borderColor:
+                    'rgba(255,255,255,0.12)',
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] px-3.5 py-1.5 text-[10px] font-medium uppercase tracking-widest text-slate-400 sm:text-[11px]"
               >
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
+
                 Open to opportunities
               </motion.span>
             </motion.div>
@@ -213,12 +287,21 @@ export default function Hero() {
             <motion.div
               variants={fadeUp(0.3)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="mb-4 overflow-hidden"
             >
               <h1 className="font-display text-4xl font-bold leading-[1] tracking-tight text-white sm:text-5xl lg:text-[3.1rem] xl:text-5xl">
-                <span className="mr-3 inline-block">P.S.</span>
-                <span className="inline-block">Hariharasudhan</span>
+                <span className="mr-3 inline-block">
+                  P.S.
+                </span>
+
+                <span className="inline-block">
+                  Hariharasudhan
+                </span>
               </h1>
             </motion.div>
 
@@ -226,19 +309,34 @@ export default function Hero() {
             <motion.div
               variants={fadeUp(0.45)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="mb-4"
             >
               <div className="h-6 text-[14px] font-medium sm:text-[15px]">
                 <TypingRole />
               </div>
+
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium sm:text-[12px]">
-                {SPECIALIZATIONS.map((specialization, index) => (
-                  <span key={specialization} className="text-slate-500">
-                    {index > 0 && <span className="mr-2 text-white/10">·</span>}
-                    {specialization}
-                  </span>
-                ))}
+                {SPECIALIZATIONS.map(
+                  (specialization, index) => (
+                    <span
+                      key={specialization}
+                      className="text-slate-500"
+                    >
+                      {index > 0 && (
+                        <span className="mr-2 text-white/10">
+                          ·
+                        </span>
+                      )}
+
+                      {specialization}
+                    </span>
+                  )
+                )}
               </div>
             </motion.div>
 
@@ -246,68 +344,106 @@ export default function Hero() {
             <motion.p
               variants={fadeUp(0.6)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="mb-6 max-w-lg text-[14px] leading-relaxed text-slate-400 sm:text-[15px]"
             >
-              Building intelligent AI systems, automation workflows,
-              machine-learning applications, and modern full-stack products.
+              Building intelligent AI systems,
+              automation workflows,
+              machine-learning applications,
+              and modern full-stack products.
             </motion.p>
 
             {/* BUTTONS */}
             <motion.div
               variants={fadeUp(0.75)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="mb-6 flex flex-wrap items-center gap-3"
             >
-              {/* View Projects */}
+              {/* VIEW PROJECTS ONLY */}
               <motion.a
                 href="#projects"
-                whileHover={{ scale: 1.04, boxShadow: '0 10px 40px rgba(255,255,255,0.08)' }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{
+                  scale: 1.04,
+                  boxShadow:
+                    '0 10px 40px rgba(255,255,255,0.08)',
+                }}
+                whileTap={{
+                  scale: 0.97,
+                }}
                 className="group inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[13px] font-semibold text-dark transition-colors hover:bg-slate-100 sm:px-6 sm:py-3"
               >
                 <span>View Projects</span>
+
                 <ArrowRight
                   size={15}
                   className="transition-transform duration-300 group-hover:translate-x-1"
                 />
               </motion.a>
+            </motion.div>
 
-              {/* View Resume — opens in new tab, no download */}
-            
             {/* SOCIAL ICONS */}
             <motion.div
               variants={fadeUp(0.9)}
               initial="hidden"
-              animate={started ? 'visible' : 'hidden'}
+              animate={
+                started
+                  ? 'visible'
+                  : 'hidden'
+              }
               className="flex items-center gap-3"
             >
-              {/* GitHub */}
+              {/* GITHUB */}
               <motion.a
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
                 title="GitHub"
-                whileHover={{ y: -4, scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                whileHover={{
+                  y: -4,
+                  scale: 1.08,
+                }}
+                whileTap={{
+                  scale: 0.92,
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 15,
+                }}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-white transition-all duration-300 hover:border-white/[0.25] hover:bg-white/[0.1]"
               >
                 <GithubIcon size={19} />
               </motion.a>
 
-              {/* LinkedIn */}
+              {/* LINKEDIN */}
               <motion.a
                 href={LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
                 title="LinkedIn"
-                whileHover={{ y: -4, scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                whileHover={{
+                  y: -4,
+                  scale: 1.08,
+                }}
+                whileTap={{
+                  scale: 0.92,
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 15,
+                }}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-white transition-all duration-300 hover:border-white/[0.25] hover:bg-white/[0.1]"
               >
                 <LinkedinIcon size={19} />
@@ -318,91 +454,191 @@ export default function Hero() {
           {/* RIGHT VIDEO */}
           <motion.div
             className="order-2 flex items-center justify-center lg:justify-end lg:-translate-x-8 xl:-translate-x-10"
-            initial={{ opacity: 0, y: 40 }}
-            animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: 'easeOut' }}
+            initial={{
+              opacity: 0,
+              y: 40,
+            }}
+            animate={
+              started
+                ? {
+                    opacity: 1,
+                    y: 0,
+                  }
+                : {
+                    opacity: 0,
+                    y: 40,
+                  }
+            }
+            transition={{
+              duration: 0.9,
+              delay: 0.15,
+              ease: 'easeOut',
+            }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={started ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
+              initial={{
+                opacity: 0,
+                scale: 0.97,
+              }}
+              animate={
+                started
+                  ? {
+                      opacity: 1,
+                      scale: 1,
+                    }
+                  : {
+                      opacity: 0,
+                      scale: 0.97,
+                    }
+              }
+              transition={{
+                duration: 0.8,
+                delay: 0.25,
+                ease: 'easeOut',
+              }}
               className="relative w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[370px] xl:max-w-[400px]"
             >
+
               {/* AMBIENT GLOW */}
               <div className="absolute -inset-5 rounded-3xl bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-cyan-500/[0.04] opacity-70 blur-2xl" />
 
               {/* VIDEO */}
               <TiltCard>
                 <div className="video-container relative aspect-[4/6] w-full overflow-hidden rounded-[1.25rem] bg-dark-lighter shadow-2xl shadow-black/40">
-    <video
-  autoPlay
-  muted
-  playsInline
-  className="h-full w-full object-cover"
-  onLoadedMetadata={(event) => {
-    const video = event.currentTarget;
 
-    // Start from the last 7 seconds
-    video.currentTime = Math.max(0, video.duration - 9);
+                  <video
+                    autoPlay
+                    muted
+                    playsInline
+                    className="h-full w-full object-cover"
+                    onLoadedMetadata={(event) => {
+                      const video =
+                        event.currentTarget;
 
-    video.play().catch(() => {});
-  }}
-  onTimeUpdate={(event) => {
-    const video = event.currentTarget;
+                      // Start from the last 9 seconds
+                      video.currentTime =
+                        Math.max(
+                          0,
+                          video.duration - 9
+                        );
 
-    const startTime = Math.max(0, video.duration - 7);
+                      video
+                        .play()
+                        .catch(() => {});
+                    }}
+                    onTimeUpdate={(event) => {
+                      const video =
+                        event.currentTarget;
 
-    if (video.currentTime >= video.duration - 0.05) {
-      const playCount = Number(video.dataset.playCount || '0') + 1;
-      video.dataset.playCount = String(playCount);
+                      const startTime =
+                        Math.max(
+                          0,
+                          video.duration - 7
+                        );
 
-      if (playCount < 1) {
-        // Restart the last 7 seconds
-        video.currentTime = startTime;
-        video.play().catch(() => {});
-      } else {
-        // Stop after 3 plays
-        video.pause();
-      }
-    }
-  }}
->
-  <source src={PERSONAL_VIDEO} type="video/mp4" />
-</video>
+                      if (
+                        video.currentTime >=
+                        video.duration - 0.05
+                      ) {
+                        const playCount =
+                          Number(
+                            video.dataset.playCount ||
+                              '0'
+                          ) + 1;
+
+                        video.dataset.playCount =
+                          String(playCount);
+
+                        if (playCount < 1) {
+                          video.currentTime =
+                            startTime;
+
+                          video
+                            .play()
+                            .catch(() => {});
+                        } else {
+                          video.pause();
+                        }
+                      }
+                    }}
+                  >
+                    <source
+                      src={PERSONAL_VIDEO}
+                      type="video/mp4"
+                    />
+                  </video>
+
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-dark/10 via-transparent to-dark/30" />
                 </div>
               </TiltCard>
 
               {/* TOP LEFT CORNER */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={started ? { opacity: 1 } : { opacity: 0 }}
-                transition={{ delay: 1.1, duration: 0.4 }}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={
+                  started
+                    ? { opacity: 1 }
+                    : { opacity: 0 }
+                }
+                transition={{
+                  delay: 1.1,
+                  duration: 0.4,
+                }}
                 className="absolute -left-2 -top-2 h-5 w-5 rounded-tl-md border-l border-t border-white/[0.12]"
               />
 
               {/* BOTTOM RIGHT CORNER */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={started ? { opacity: 1 } : { opacity: 0 }}
-                transition={{ delay: 1.2, duration: 0.4 }}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={
+                  started
+                    ? { opacity: 1 }
+                    : { opacity: 0 }
+                }
+                transition={{
+                  delay: 1.2,
+                  duration: 0.4,
+                }}
                 className="absolute -bottom-2 -right-2 h-5 w-5 rounded-br-md border-b border-r border-white/[0.12]"
               />
 
               {/* FLOATING LABEL */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-                transition={{ delay: 1.3, duration: 0.5, ease: 'easeOut' }}
+                initial={{
+                  opacity: 0,
+                  y: 15,
+                }}
+                animate={
+                  started
+                    ? {
+                        opacity: 1,
+                        y: 0,
+                      }
+                    : {
+                        opacity: 0,
+                        y: 15,
+                      }
+                }
+                transition={{
+                  delay: 1.3,
+                  duration: 0.5,
+                  ease: 'easeOut',
+                }}
                 className="absolute -left-3 bottom-12 sm:-left-4"
               >
                 <div className="glass flex items-center gap-2 rounded-lg px-3 py-2">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+
                   <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
                     AI Engineer
                   </span>
                 </div>
               </motion.div>
+
             </motion.div>
           </motion.div>
 
@@ -411,9 +647,25 @@ export default function Hero() {
 
       {/* SCROLL INDICATOR */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-        transition={{ delay: 1.8, duration: 0.6 }}
+        initial={{
+          opacity: 0,
+          y: 10,
+        }}
+        animate={
+          started
+            ? {
+                opacity: 1,
+                y: 0,
+              }
+            : {
+                opacity: 0,
+                y: 10,
+              }
+        }
+        transition={{
+          delay: 1.8,
+          duration: 0.6,
+        }}
         className="absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 lg:block"
       >
         <a
@@ -423,14 +675,27 @@ export default function Hero() {
           <span className="font-mono text-[9px] font-medium uppercase tracking-[0.25em]">
             Scroll
           </span>
+
           <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            animate={{
+              y: [0, 5, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: 'easeInOut',
+            }}
             className="flex h-7 w-4 justify-center rounded-full border border-slate-800 pt-1.5"
           >
             <motion.div
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+              animate={{
+                opacity: [1, 0.3, 1],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: 'easeInOut',
+              }}
               className="h-1.5 w-0.5 rounded-full bg-slate-600"
             />
           </motion.div>
