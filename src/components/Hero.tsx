@@ -1,34 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   motion,
   useMotionValue,
   useSpring,
   useTransform,
-} from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+} from "framer-motion";
+import { ArrowRight, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 /* =========================================================
    CONSTANTS
 ========================================================= */
 
-const PERSONAL_VIDEO = '/hero-video.mp4';
-const GITHUB_URL = 'https://github.com/iamh2s';
+const PERSONAL_VIDEO = "/hero-video.mp4";
+
+const GITHUB_URL = "https://github.com/iamh2s";
+
 const LINKEDIN_URL =
-  'https://www.linkedin.com/in/hariharasudhan01112004/';
+  "https://www.linkedin.com/in/hariharasudhan01112004/";
 
 const ROLES = [
-  'AI Engineer',
-  'Freelancer',
-  'Generative AI Developer',
-  'Full-Stack Developer',
-  'Machine Learning Engineer',
-  'Freelancer',
+  "AI Engineer",
+  "Freelancer",
+  "Generative AI Developer",
+  "Full-Stack Developer",
+  "Machine Learning Engineer",
+  "Freelancer",
 ];
 
 const SPECIALIZATIONS = [
-  'Generative AI',
-  'Machine Learning',
-  'Full-Stack Development',
+  "Generative AI",
+  "Machine Learning",
+  "Full-Stack Development",
 ];
 
 /* =========================================================
@@ -75,14 +78,18 @@ function LinkedinIcon({ size = 20 }: { size?: number }) {
 
 function fadeUp(delay: number) {
   return {
-    hidden: { opacity: 0, y: 25 },
+    hidden: {
+      opacity: 0,
+      y: 25,
+    },
+
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         delay,
         duration: 0.65,
-        ease: 'easeOut' as const,
+        ease: "easeOut" as const,
       },
     },
   };
@@ -94,7 +101,7 @@ function fadeUp(delay: number) {
 
 function TypingRole() {
   const [index, setIndex] = useState(0);
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -102,13 +109,18 @@ function TypingRole() {
     const speed = deleting ? 30 : 60;
 
     if (!deleting && text === currentRole) {
-      const timer = setTimeout(() => setDeleting(true), 2000);
+      const timer = setTimeout(() => {
+        setDeleting(true);
+      }, 2000);
+
       return () => clearTimeout(timer);
     }
 
-    if (deleting && text === '') {
+    if (deleting && text === "") {
       setDeleting(false);
+
       setIndex((i) => (i + 1) % ROLES.length);
+
       return;
     }
 
@@ -166,8 +178,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   const handleMove = (
     event: React.MouseEvent<HTMLDivElement>
   ) => {
-    const rect =
-      event.currentTarget.getBoundingClientRect();
+    const rect = event.currentTarget.getBoundingClientRect();
 
     x.set(
       (event.clientX - rect.left) / rect.width - 0.5
@@ -205,11 +216,14 @@ function TiltCard({ children }: { children: React.ReactNode }) {
 export default function Hero() {
   const [started, setStarted] = useState(false);
 
+  /* =======================================================
+     START HERO AFTER 3 SECONDS
+  ======================================================= */
+
   useEffect(() => {
-    const timer = setTimeout(
-      () => setStarted(true),
-      3000
-    );
+    const timer = setTimeout(() => {
+      setStarted(true);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -219,18 +233,27 @@ export default function Hero() {
       id="home"
       className="noise relative flex min-h-[calc(100vh-80px)] items-center overflow-hidden"
     >
-      {/* BACKGROUND */}
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
+
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[45%] top-0 hidden h-full w-px bg-white/[0.02] lg:block" />
 
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
       </div>
 
-      {/* MAIN CONTAINER */}
+      {/* =====================================================
+          MAIN CONTAINER
+      ===================================================== */}
+
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-10">
         <div className="grid min-h-[calc(100vh-80px)] items-center gap-10 lg:grid-cols-[50%_50%] lg:gap-10 xl:gap-14">
 
-          {/* LEFT CONTENT */}
+          {/* =================================================
+              LEFT CONTENT
+          ================================================= */}
+
           <motion.div
             className="order-1 flex flex-col justify-center"
             initial={{
@@ -250,26 +273,25 @@ export default function Hero() {
             }
             transition={{
               duration: 0.9,
-              ease: 'easeOut',
+              ease: "easeOut",
             }}
           >
 
-            {/* STATUS */}
+            {/* =================================================
+                STATUS
+            ================================================= */}
+
             <motion.div
               variants={fadeUp(0.2)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="mb-5"
             >
               <motion.span
                 whileHover={{
                   scale: 1.03,
                   borderColor:
-                    'rgba(255,255,255,0.12)',
+                    "rgba(255,255,255,0.12)",
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] px-3.5 py-1.5 text-[10px] font-medium uppercase tracking-widest text-slate-400 sm:text-[11px]"
               >
@@ -283,15 +305,14 @@ export default function Hero() {
               </motion.span>
             </motion.div>
 
-            {/* NAME */}
+            {/* =================================================
+                NAME
+            ================================================= */}
+
             <motion.div
               variants={fadeUp(0.3)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="mb-4 overflow-hidden"
             >
               <h1 className="font-display text-4xl font-bold leading-[1] tracking-tight text-white sm:text-5xl lg:text-[3.1rem] xl:text-5xl">
@@ -305,15 +326,14 @@ export default function Hero() {
               </h1>
             </motion.div>
 
-            {/* TYPING ROLE */}
+            {/* =================================================
+                TYPING ROLE
+            ================================================= */}
+
             <motion.div
               variants={fadeUp(0.45)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="mb-4"
             >
               <div className="h-6 text-[14px] font-medium sm:text-[15px]">
@@ -340,15 +360,14 @@ export default function Hero() {
               </div>
             </motion.div>
 
-            {/* DESCRIPTION */}
+            {/* =================================================
+                DESCRIPTION
+            ================================================= */}
+
             <motion.p
               variants={fadeUp(0.6)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="mb-6 max-w-lg text-[14px] leading-relaxed text-slate-400 sm:text-[15px]"
             >
               Building intelligent AI systems,
@@ -357,51 +376,84 @@ export default function Hero() {
               and modern full-stack products.
             </motion.p>
 
-            {/* BUTTONS */}
+            {/* =================================================
+                BUTTONS
+            ================================================= */}
+
             <motion.div
               variants={fadeUp(0.75)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="mb-6 flex flex-wrap items-center gap-3"
             >
-              {/* VIEW PROJECTS ONLY */}
+
+              {/* =================================================
+                  VIEW PROJECTS
+              ================================================= */}
+
               <motion.a
                 href="#projects"
                 whileHover={{
                   scale: 1.04,
                   boxShadow:
-                    '0 10px 40px rgba(255,255,255,0.08)',
+                    "0 10px 40px rgba(255,255,255,0.08)",
                 }}
                 whileTap={{
                   scale: 0.97,
                 }}
                 className="group inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[13px] font-semibold text-dark transition-colors hover:bg-slate-100 sm:px-6 sm:py-3"
               >
-                <span>View Projects</span>
+                <span>
+                  View Projects
+                </span>
 
                 <ArrowRight
                   size={15}
                   className="transition-transform duration-300 group-hover:translate-x-1"
                 />
               </motion.a>
+
+              {/* =================================================
+                  MY WORKS
+              ================================================= */}
+
+              <Link
+                to="/my-works"
+                className="inline-flex"
+              >
+                <motion.div
+                  whileHover={{
+                    scale: 1.04,
+                    backgroundColor:
+                      "rgba(255,255,255,0.05)",
+                  }}
+                  whileTap={{
+                    scale: 0.97,
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-5 py-2.5 text-[13px] font-semibold text-slate-300 transition-all hover:border-white/[0.18] hover:text-white sm:px-6 sm:py-3"
+                >
+                  <ExternalLink size={15} />
+
+                  <span>
+                    My Works
+                  </span>
+                </motion.div>
+              </Link>
             </motion.div>
 
-            {/* SOCIAL ICONS */}
+            {/* =================================================
+                SOCIAL ICONS
+            ================================================= */}
+
             <motion.div
               variants={fadeUp(0.9)}
               initial="hidden"
-              animate={
-                started
-                  ? 'visible'
-                  : 'hidden'
-              }
+              animate={started ? "visible" : "hidden"}
               className="flex items-center gap-3"
             >
+
               {/* GITHUB */}
+
               <motion.a
                 href={GITHUB_URL}
                 target="_blank"
@@ -416,7 +468,7 @@ export default function Hero() {
                   scale: 0.92,
                 }}
                 transition={{
-                  type: 'spring',
+                  type: "spring",
                   stiffness: 400,
                   damping: 15,
                 }}
@@ -426,6 +478,7 @@ export default function Hero() {
               </motion.a>
 
               {/* LINKEDIN */}
+
               <motion.a
                 href={LINKEDIN_URL}
                 target="_blank"
@@ -440,7 +493,7 @@ export default function Hero() {
                   scale: 0.92,
                 }}
                 transition={{
-                  type: 'spring',
+                  type: "spring",
                   stiffness: 400,
                   damping: 15,
                 }}
@@ -451,7 +504,10 @@ export default function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* RIGHT VIDEO */}
+          {/* =================================================
+              RIGHT VIDEO
+          ================================================= */}
+
           <motion.div
             className="order-2 flex items-center justify-center lg:justify-end lg:-translate-x-8 xl:-translate-x-10"
             initial={{
@@ -472,9 +528,10 @@ export default function Hero() {
             transition={{
               duration: 0.9,
               delay: 0.15,
-              ease: 'easeOut',
+              ease: "easeOut",
             }}
           >
+
             <motion.div
               initial={{
                 opacity: 0,
@@ -494,15 +551,21 @@ export default function Hero() {
               transition={{
                 duration: 0.8,
                 delay: 0.25,
-                ease: 'easeOut',
+                ease: "easeOut",
               }}
               className="relative w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[370px] xl:max-w-[400px]"
             >
 
-              {/* AMBIENT GLOW */}
+              {/* =================================================
+                  AMBIENT GLOW
+              ================================================= */}
+
               <div className="absolute -inset-5 rounded-3xl bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-cyan-500/[0.04] opacity-70 blur-2xl" />
 
-              {/* VIDEO */}
+              {/* =================================================
+                  VIDEO
+              ================================================= */}
+
               <TiltCard>
                 <div className="video-container relative aspect-[4/6] w-full overflow-hidden rounded-[1.25rem] bg-dark-lighter shadow-2xl shadow-black/40">
 
@@ -512,29 +575,25 @@ export default function Hero() {
                     playsInline
                     className="h-full w-full object-cover"
                     onLoadedMetadata={(event) => {
-                      const video =
-                        event.currentTarget;
+                      const video = event.currentTarget;
 
                       // Start from the last 9 seconds
-                      video.currentTime =
-                        Math.max(
-                          0,
-                          video.duration - 9
-                        );
+                      video.currentTime = Math.max(
+                        0,
+                        video.duration - 9
+                      );
 
                       video
                         .play()
                         .catch(() => {});
                     }}
                     onTimeUpdate={(event) => {
-                      const video =
-                        event.currentTarget;
+                      const video = event.currentTarget;
 
-                      const startTime =
-                        Math.max(
-                          0,
-                          video.duration - 7
-                        );
+                      const startTime = Math.max(
+                        0,
+                        video.duration - 7
+                      );
 
                       if (
                         video.currentTime >=
@@ -542,16 +601,14 @@ export default function Hero() {
                       ) {
                         const playCount =
                           Number(
-                            video.dataset.playCount ||
-                              '0'
+                            video.dataset.playCount || "0"
                           ) + 1;
 
                         video.dataset.playCount =
                           String(playCount);
 
                         if (playCount < 1) {
-                          video.currentTime =
-                            startTime;
+                          video.currentTime = startTime;
 
                           video
                             .play()
@@ -568,11 +625,16 @@ export default function Hero() {
                     />
                   </video>
 
+                  {/* VIDEO OVERLAY */}
+
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-dark/10 via-transparent to-dark/30" />
                 </div>
               </TiltCard>
 
-              {/* TOP LEFT CORNER */}
+              {/* =================================================
+                  TOP LEFT CORNER
+              ================================================= */}
+
               <motion.div
                 initial={{
                   opacity: 0,
@@ -589,7 +651,10 @@ export default function Hero() {
                 className="absolute -left-2 -top-2 h-5 w-5 rounded-tl-md border-l border-t border-white/[0.12]"
               />
 
-              {/* BOTTOM RIGHT CORNER */}
+              {/* =================================================
+                  BOTTOM RIGHT CORNER
+              ================================================= */}
+
               <motion.div
                 initial={{
                   opacity: 0,
@@ -606,7 +671,10 @@ export default function Hero() {
                 className="absolute -bottom-2 -right-2 h-5 w-5 rounded-br-md border-b border-r border-white/[0.12]"
               />
 
-              {/* FLOATING LABEL */}
+              {/* =================================================
+                  FLOATING LABEL
+              ================================================= */}
+
               <motion.div
                 initial={{
                   opacity: 0,
@@ -626,7 +694,7 @@ export default function Hero() {
                 transition={{
                   delay: 1.3,
                   duration: 0.5,
-                  ease: 'easeOut',
+                  ease: "easeOut",
                 }}
                 className="absolute -left-3 bottom-12 sm:-left-4"
               >
@@ -638,14 +706,15 @@ export default function Hero() {
                   </span>
                 </div>
               </motion.div>
-
             </motion.div>
           </motion.div>
-
         </div>
       </div>
 
-      {/* SCROLL INDICATOR */}
+      {/* =====================================================
+          SCROLL INDICATOR
+      ===================================================== */}
+
       <motion.div
         initial={{
           opacity: 0,
@@ -683,7 +752,7 @@ export default function Hero() {
             transition={{
               repeat: Infinity,
               duration: 2,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
             className="flex h-7 w-4 justify-center rounded-full border border-slate-800 pt-1.5"
           >
@@ -694,7 +763,7 @@ export default function Hero() {
               transition={{
                 repeat: Infinity,
                 duration: 2,
-                ease: 'easeInOut',
+                ease: "easeInOut",
               }}
               className="h-1.5 w-0.5 rounded-full bg-slate-600"
             />
