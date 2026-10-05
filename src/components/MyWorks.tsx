@@ -113,7 +113,8 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Ajay & Susmi",
     event: "Wedding",
     tier: "Velvet Bloom",
-    image: "https://ajaywedssusmi.vercel.app/images/gallery/02.jpg",
+    image:
+      "https://ajaywedssusmi.vercel.app/images/gallery/02.jpg",
     description:
       "A complete cinematic wedding invitation experience with rich visual storytelling.",
     link: "https://ajaywedssusmi.vercel.app/",
@@ -124,7 +125,8 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Ram & Janu",
     event: "Wedding",
     tier: "Classic",
-    image: "https://ramandjanuclassic.vercel.app/images/couple.png",
+    image:
+      "https://ramandjanuclassic.vercel.app/images/couple.png",
     description:
       "An elegant wedding invitation featuring beautiful photography and immersive animations.",
     link: "https://ramandjanuclassic.vercel.app/",
@@ -268,6 +270,7 @@ function FilterButton({
         font-medium
         transition-all
         duration-300
+
         ${
           active
             ? "border-white/20 bg-white text-dark shadow-lg shadow-white/[0.05]"
@@ -291,7 +294,12 @@ function ProjectCard({
   project: InvitationProject;
   index: number;
 }) {
-  const tierDescription = TIER_INFO[project.tier].description;
+  const tierDescription =
+    TIER_INFO[project.tier].description;
+
+  const hasLink =
+    project.link.trim() !== "" &&
+    project.link !== "#";
 
   return (
     <motion.article
@@ -352,11 +360,13 @@ function ProjectCard({
           }}
         />
 
-        {/* Image Overlay */}
+        {/* IMAGE OVERLAY */}
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-        {/* Tier */}
+        {/* =================================================
+            TIER
+        ================================================= */}
 
         <div className="absolute left-4 top-4">
           <span
@@ -379,7 +389,9 @@ function ProjectCard({
           </span>
         </div>
 
-        {/* Event */}
+        {/* =================================================
+            EVENT
+        ================================================= */}
 
         <div className="absolute bottom-4 left-4">
           <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/70">
@@ -387,9 +399,12 @@ function ProjectCard({
           </span>
         </div>
 
-        {/* Open */}
+        {/* =================================================
+            DESKTOP OPEN ICON
+            Hover -> appears
+        ================================================= */}
 
-        {project.link !== "#" && (
+        {hasLink && (
           <a
             href={project.link}
             target="_blank"
@@ -400,23 +415,31 @@ function ProjectCard({
               bottom-4
               right-4
               flex
-              h-9
-              w-9
+              h-10
+              w-10
               items-center
               justify-center
               rounded-full
               border
-              border-white/10
-              bg-black/40
+              border-white/20
+              bg-black/50
               text-white
-              opacity-0
               backdrop-blur-md
+
+              opacity-100
+
               transition-all
               duration-300
-              group-hover:opacity-100
+
+              hover:scale-110
+              hover:border-white/40
+              hover:bg-black/70
+
+              sm:opacity-0
+              sm:group-hover:opacity-100
             "
           >
-            <ArrowUpRight size={16} />
+            <ArrowUpRight size={17} />
           </a>
         )}
       </div>
@@ -428,8 +451,8 @@ function ProjectCard({
       <div className="p-5">
 
         <div className="flex items-start justify-between gap-4">
+          <div className="w-full">
 
-          <div>
             <h3 className="text-lg font-semibold text-white">
               {project.title}
             </h3>
@@ -437,11 +460,13 @@ function ProjectCard({
             <p className="mt-2 text-sm leading-relaxed text-slate-400">
               {project.description}
             </p>
-          </div>
 
+          </div>
         </div>
 
-        {/* Tier info */}
+        {/* =================================================
+            TIER DESCRIPTION
+        ================================================= */}
 
         <div className="mt-5 border-t border-white/[0.06] pt-4">
 
@@ -450,6 +475,57 @@ function ProjectCard({
           </p>
 
         </div>
+
+        {/* =================================================
+            OPEN INVITATION BUTTON
+            Mobile + Desktop
+        ================================================= */}
+
+        {hasLink && (
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              mt-5
+              flex
+              w-full
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-white/[0.10]
+              bg-white/[0.04]
+              px-5
+              py-3
+              text-sm
+              font-semibold
+              text-white
+              transition-all
+              duration-300
+
+              hover:border-white/[0.25]
+              hover:bg-white/[0.08]
+              hover:shadow-lg
+              hover:shadow-black/20
+
+              active:scale-[0.98]
+            "
+          >
+            <span>Open Invitation</span>
+
+            <ArrowUpRight
+              size={17}
+              className="
+                transition-transform
+                duration-300
+                group-hover:translate-x-0.5
+                group-hover:-translate-y-0.5
+              "
+            />
+          </a>
+        )}
 
       </div>
     </motion.article>
@@ -461,7 +537,6 @@ function ProjectCard({
 ========================================================= */
 
 export default function MyWorks() {
-
   /* =======================================================
      FILTER STATE
   ======================================================= */
@@ -480,9 +555,7 @@ export default function MyWorks() {
   ======================================================= */
 
   const filteredProjects = useMemo(() => {
-
     return INVITATION_PROJECTS.filter((project) => {
-
       const eventMatch =
         selectedEvent === "All" ||
         project.event === selectedEvent;
@@ -493,7 +566,6 @@ export default function MyWorks() {
 
       return eventMatch && tierMatch;
     });
-
   }, [selectedEvent, selectedTier]);
 
   /* =======================================================
@@ -518,9 +590,9 @@ export default function MyWorks() {
 
       <div className="mx-auto min-h-screen max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
 
-        {/* =====================================================
+        {/* =================================================
             TOP BAR
-        ===================================================== */}
+        ================================================= */}
 
         <motion.div
           initial={{
@@ -581,7 +653,9 @@ export default function MyWorks() {
           <button
             type="button"
             onClick={() =>
-              setMobileFilterOpen((value) => !value)
+              setMobileFilterOpen(
+                (value) => !value
+              )
             }
             className="
               flex
@@ -606,13 +680,26 @@ export default function MyWorks() {
             <span>
               Filters
             </span>
+
+            <ChevronDown
+              size={15}
+              className={`
+                transition-transform
+                duration-300
+                ${
+                  mobileFilterOpen
+                    ? "rotate-180"
+                    : ""
+                }
+              `}
+            />
           </button>
 
         </motion.div>
 
-        {/* =====================================================
+        {/* =================================================
             HEADER
-        ===================================================== */}
+        ================================================= */}
 
         <motion.div
           initial={{
@@ -645,9 +732,9 @@ export default function MyWorks() {
 
         </motion.div>
 
-        {/* =====================================================
+        {/* =================================================
             DESKTOP FILTERS
-        ===================================================== */}
+        ================================================= */}
 
         <motion.div
           initial={{
@@ -668,19 +755,25 @@ export default function MyWorks() {
           {/* EVENT FILTER */}
 
           <div>
+
             <div className="mb-4 flex items-center gap-2">
+
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Event
               </span>
 
               <div className="h-px flex-1 bg-white/[0.05]" />
+
             </div>
 
             <div className="flex flex-wrap gap-2">
+
               {EVENT_OPTIONS.map((event) => (
                 <FilterButton
                   key={event}
-                  active={selectedEvent === event}
+                  active={
+                    selectedEvent === event
+                  }
                   onClick={() =>
                     setSelectedEvent(event)
                   }
@@ -690,7 +783,9 @@ export default function MyWorks() {
                     : event}
                 </FilterButton>
               ))}
+
             </div>
+
           </div>
 
           {/* TIER FILTER */}
@@ -698,18 +793,23 @@ export default function MyWorks() {
           <div className="mt-7">
 
             <div className="mb-4 flex items-center gap-2">
+
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Experience
               </span>
 
               <div className="h-px flex-1 bg-white/[0.05]" />
+
             </div>
 
             <div className="flex flex-wrap gap-2">
+
               {TIER_OPTIONS.map((tier) => (
                 <FilterButton
                   key={tier}
-                  active={selectedTier === tier}
+                  active={
+                    selectedTier === tier
+                  }
                   onClick={() =>
                     setSelectedTier(tier)
                   }
@@ -719,15 +819,16 @@ export default function MyWorks() {
                     : tier}
                 </FilterButton>
               ))}
+
             </div>
 
           </div>
 
         </motion.div>
 
-        {/* =====================================================
+        {/* =================================================
             MOBILE FILTER PANEL
-        ===================================================== */}
+        ================================================= */}
 
         <AnimatePresence>
           {mobileFilterOpen && (
@@ -752,6 +853,7 @@ export default function MyWorks() {
                 <div className="mb-5 flex items-center justify-between">
 
                   <div className="flex items-center gap-2">
+
                     <Filter
                       size={16}
                       className="text-slate-400"
@@ -760,6 +862,7 @@ export default function MyWorks() {
                     <span className="text-sm font-semibold text-white">
                       Filters
                     </span>
+
                   </div>
 
                   <button
@@ -781,10 +884,13 @@ export default function MyWorks() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
+
                   {EVENT_OPTIONS.map((event) => (
                     <FilterButton
                       key={event}
-                      active={selectedEvent === event}
+                      active={
+                        selectedEvent === event
+                      }
                       onClick={() =>
                         setSelectedEvent(event)
                       }
@@ -794,6 +900,7 @@ export default function MyWorks() {
                         : event}
                     </FilterButton>
                   ))}
+
                 </div>
 
                 {/* TIER */}
@@ -803,10 +910,13 @@ export default function MyWorks() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
+
                   {TIER_OPTIONS.map((tier) => (
                     <FilterButton
                       key={tier}
-                      active={selectedTier === tier}
+                      active={
+                        selectedTier === tier
+                      }
                       onClick={() =>
                         setSelectedTier(tier)
                       }
@@ -816,6 +926,7 @@ export default function MyWorks() {
                         : tier}
                     </FilterButton>
                   ))}
+
                 </div>
 
               </div>
@@ -824,9 +935,9 @@ export default function MyWorks() {
           )}
         </AnimatePresence>
 
-        {/* =====================================================
+        {/* =================================================
             ACTIVE FILTER SUMMARY
-        ===================================================== */}
+        ================================================= */}
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
 
@@ -835,9 +946,11 @@ export default function MyWorks() {
             <span className="text-white">
               {filteredProjects.length}
             </span>{" "}
+
             {filteredProjects.length === 1
               ? "invitation"
               : "invitations"}{" "}
+
             found
 
           </p>
@@ -865,9 +978,9 @@ export default function MyWorks() {
 
         </div>
 
-        {/* =====================================================
+        {/* =================================================
             PROJECT GRID
-        ===================================================== */}
+        ================================================= */}
 
         <motion.div
           layout
@@ -896,9 +1009,9 @@ export default function MyWorks() {
 
         </motion.div>
 
-        {/* =====================================================
+        {/* =================================================
             NO RESULTS
-        ===================================================== */}
+        ================================================= */}
 
         {filteredProjects.length === 0 && (
           <motion.div
@@ -921,10 +1034,12 @@ export default function MyWorks() {
           >
 
             <div className="rounded-full border border-white/[0.07] bg-white/[0.02] p-4">
+
               <Filter
                 size={22}
                 className="text-slate-500"
               />
+
             </div>
 
             <h2 className="mt-5 text-lg font-semibold text-white">
@@ -958,9 +1073,9 @@ export default function MyWorks() {
           </motion.div>
         )}
 
-        {/* =====================================================
+        {/* =================================================
             CONTACT CTA
-        ===================================================== */}
+        ================================================= */}
 
         <motion.div
           initial={{
