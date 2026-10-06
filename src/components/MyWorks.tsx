@@ -181,7 +181,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Keerthana Manjal Neerattu Vizha",
     event: "Puberty",
     tier: "Velvet Bloom",
-    image: "http://localhost:5173/images/girl-hero.jpg",
+    image: "https://keerthana-puberty.vercel.app/images/gallery-family.jpg",
     description:
       "A traditional celebration presented through a rich digital invitation experience.",
     link: "https://keerthana-puberty.vercel.app",
