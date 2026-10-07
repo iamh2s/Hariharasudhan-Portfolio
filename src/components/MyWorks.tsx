@@ -104,6 +104,137 @@ const TIER_INFO: Record<
 };
 
 /* =========================================================
+   TIER STYLES
+========================================================= */
+
+const TIER_STYLES: Record<
+  InvitationTier,
+  {
+    card: string;
+    imageOverlay: string;
+    badge: string;
+    event: string;
+    title: string;
+    description: string;
+    divider: string;
+    button: string;
+    icon: string;
+    glow: string;
+  }
+> = {
+  /* =======================================================
+     CLASSIC
+     Champagne / Ivory / Soft Gold
+  ======================================================= */
+
+  Classic: {
+    card:
+      "border-[#d8c39a]/20 bg-[#f8f3e7]/[0.035] hover:border-[#d8c39a]/40 hover:bg-[#f8f3e7]/[0.055]",
+
+    imageOverlay:
+      "bg-gradient-to-t from-[#17130d]/85 via-[#17130d]/20 to-transparent",
+
+    badge:
+      "border-[#d8c39a]/30 bg-[#17130d]/65 text-[#f3dfb0]",
+
+    event:
+      "text-[#e5cf9b]/80",
+
+    title:
+      "text-[#f7efd9]",
+
+    description:
+      "text-[#cfc4aa]",
+
+    divider:
+      "border-[#d8c39a]/15",
+
+    button:
+      "border-[#d8c39a]/25 bg-[#d8c39a]/[0.08] text-[#f3dfb0] hover:border-[#d8c39a]/50 hover:bg-[#d8c39a]/[0.15]",
+
+    icon:
+      "text-[#e5cf9b]",
+
+    glow:
+      "shadow-[#d8c39a]/10",
+  },
+
+  /* =======================================================
+     VELVET BLOOM
+     Burgundy / Rose / Velvet
+  ======================================================= */
+
+  "Velvet Bloom": {
+    card:
+      "border-[#8f3048]/30 bg-[#3b1220]/[0.18] hover:border-[#c75b73]/50 hover:bg-[#4a1627]/[0.28]",
+
+    imageOverlay:
+      "bg-gradient-to-t from-[#210912]/90 via-[#4a1627]/20 to-transparent",
+
+    badge:
+      "border-[#c75b73]/35 bg-[#210912]/70 text-[#f2a9b9]",
+
+    event:
+      "text-[#e58ca1]/85",
+
+    title:
+      "text-[#ffe9ee]",
+
+    description:
+      "text-[#d8aab5]",
+
+    divider:
+      "border-[#c75b73]/20",
+
+    button:
+      "border-[#c75b73]/30 bg-[#8f3048]/20 text-[#ffd8e0] hover:border-[#d66b84]/60 hover:bg-[#8f3048]/35",
+
+    icon:
+      "text-[#ef9caf]",
+
+    glow:
+      "shadow-[#8f3048]/20",
+  },
+
+  /* =======================================================
+     ROYAL HERITAGE
+     Navy / Antique Gold
+  ======================================================= */
+
+  "Royal Heritage": {
+    card:
+      "border-[#b9934b]/30 bg-[#111a2e]/[0.35] hover:border-[#d7b86a]/60 hover:bg-[#17233d]/[0.55]",
+
+    imageOverlay:
+      "bg-gradient-to-t from-[#080d18]/90 via-[#15213a]/20 to-transparent",
+
+    badge:
+      "border-[#d7b86a]/40 bg-[#080d18]/75 text-[#e5c879]",
+
+    event:
+      "text-[#d9bc70]/90",
+
+    title:
+      "text-[#fff5d6]",
+
+    description:
+      "text-[#c4b99f]",
+
+    divider:
+      "border-[#d7b86a]/20",
+
+    button:
+      "border-[#d7b86a]/35 bg-[#b9934b]/[0.10] text-[#f1d88f] hover:border-[#e6c978]/70 hover:bg-[#b9934b]/[0.20]",
+
+    icon:
+      "text-[#e6c978]",
+
+    glow:
+      "shadow-[#b9934b]/20",
+  },
+};
+
+/* =========================================================
    PROJECT DATA
 ========================================================= */
 
@@ -136,7 +267,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     id: 3,
     title: "Elegant Wedding",
     event: "Wedding",
-    tier: "Classic",
+    tier: "Royal Heritage",
     image: "/images/projects/wedding-classic.jpg",
     description:
       "A clean and elegant invitation focused on the essential wedding details.",
@@ -181,7 +312,8 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Keerthana Manjal Neerattu Vizha",
     event: "Puberty",
     tier: "Velvet Bloom",
-    image: "https://keerthana-puberty.vercel.app/images/gallery-family.jpg",
+    image:
+      "https://keerthana-puberty.vercel.app/images/gallery-family.jpg",
     description:
       "A traditional celebration presented through a rich digital invitation experience.",
     link: "https://keerthana-puberty.vercel.app",
@@ -297,6 +429,9 @@ function ProjectCard({
   const tierDescription =
     TIER_INFO[project.tier].description;
 
+  const tierStyle =
+    TIER_STYLES[project.tier];
+
   const hasLink =
     project.link.trim() !== "" &&
     project.link !== "#";
@@ -324,25 +459,23 @@ function ProjectCard({
       whileHover={{
         y: -6,
       }}
-      className="
+      className={`
         group
         overflow-hidden
         rounded-2xl
         border
-        border-white/[0.07]
-        bg-white/[0.02]
-        transition-colors
-        duration-300
-        hover:border-white/[0.14]
-        hover:bg-white/[0.035]
-      "
+        ${tierStyle.card}
+        transition-all
+        duration-500
+        hover:shadow-2xl
+        ${tierStyle.glow}
+      `}
     >
       {/* =====================================================
           IMAGE
       ===================================================== */}
 
       <div className="relative aspect-[16/10] overflow-hidden bg-white/[0.03]">
-
         <img
           src={project.image}
           alt={`${project.title} invitation`}
@@ -362,28 +495,33 @@ function ProjectCard({
 
         {/* IMAGE OVERLAY */}
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div
+          className={`
+            pointer-events-none
+            absolute
+            inset-0
+            ${tierStyle.imageOverlay}
+          `}
+        />
 
         {/* =================================================
-            TIER
+            TIER BADGE
         ================================================= */}
 
         <div className="absolute left-4 top-4">
           <span
-            className="
+            className={`
               rounded-full
               border
-              border-white/10
-              bg-black/40
               px-3
               py-1.5
               text-[10px]
               font-medium
               uppercase
               tracking-wider
-              text-white
               backdrop-blur-md
-            "
+              ${tierStyle.badge}
+            `}
           >
             {project.tier}
           </span>
@@ -394,14 +532,21 @@ function ProjectCard({
         ================================================= */}
 
         <div className="absolute bottom-4 left-4">
-          <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/70">
+          <span
+            className={`
+              text-[10px]
+              font-medium
+              uppercase
+              tracking-[0.2em]
+              ${tierStyle.event}
+            `}
+          >
             {project.event}
           </span>
         </div>
 
         {/* =================================================
             DESKTOP OPEN ICON
-            Hover -> appears
         ================================================= */}
 
         {hasLink && (
@@ -425,16 +570,12 @@ function ProjectCard({
               bg-black/50
               text-white
               backdrop-blur-md
-
               opacity-100
-
               transition-all
               duration-300
-
               hover:scale-110
               hover:border-white/40
               hover:bg-black/70
-
               sm:opacity-0
               sm:group-hover:opacity-100
             "
@@ -449,18 +590,32 @@ function ProjectCard({
       ===================================================== */}
 
       <div className="p-5">
-
         <div className="flex items-start justify-between gap-4">
           <div className="w-full">
+            {/* TITLE */}
 
-            <h3 className="text-lg font-semibold text-white">
+            <h3
+              className={`
+                text-lg
+                font-semibold
+                ${tierStyle.title}
+              `}
+            >
               {project.title}
             </h3>
 
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+            {/* DESCRIPTION */}
+
+            <p
+              className={`
+                mt-2
+                text-sm
+                leading-relaxed
+                ${tierStyle.description}
+              `}
+            >
               {project.description}
             </p>
-
           </div>
         </div>
 
@@ -468,17 +623,27 @@ function ProjectCard({
             TIER DESCRIPTION
         ================================================= */}
 
-        <div className="mt-5 border-t border-white/[0.06] pt-4">
-
-          <p className="text-xs leading-relaxed text-slate-500">
+        <div
+          className={`
+            mt-5
+            border-t
+            pt-4
+            ${tierStyle.divider}
+          `}
+        >
+          <p
+            className={`
+              text-xs
+              leading-relaxed
+              ${tierStyle.description}
+            `}
+          >
             {tierDescription}
           </p>
-
         </div>
 
         {/* =================================================
             OPEN INVITATION BUTTON
-            Mobile + Desktop
         ================================================= */}
 
         {hasLink && (
@@ -486,7 +651,7 @@ function ProjectCard({
             href={project.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="
+            className={`
               mt-5
               flex
               w-full
@@ -495,38 +660,30 @@ function ProjectCard({
               gap-2
               rounded-xl
               border
-              border-white/[0.10]
-              bg-white/[0.04]
               px-5
               py-3
               text-sm
               font-semibold
-              text-white
               transition-all
               duration-300
-
-              hover:border-white/[0.25]
-              hover:bg-white/[0.08]
-              hover:shadow-lg
-              hover:shadow-black/20
-
               active:scale-[0.98]
-            "
+              ${tierStyle.button}
+            `}
           >
             <span>Open Invitation</span>
 
             <ArrowUpRight
               size={17}
-              className="
+              className={`
                 transition-transform
                 duration-300
                 group-hover:translate-x-0.5
                 group-hover:-translate-y-0.5
-              "
+                ${tierStyle.icon}
+              `}
             />
           </a>
         )}
-
       </div>
     </motion.article>
   );
@@ -587,7 +744,6 @@ export default function MyWorks() {
 
   return (
     <main className="min-h-screen w-full overflow-hidden bg-dark text-white">
-
       <div className="mx-auto min-h-screen max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
 
         {/* =================================================
@@ -608,7 +764,6 @@ export default function MyWorks() {
           }}
           className="flex items-center justify-between"
         >
-
           {/* BACK */}
 
           <Link
@@ -643,9 +798,7 @@ export default function MyWorks() {
               "
             />
 
-            <span>
-              Back to Home
-            </span>
+            <span>Back to Home</span>
           </Link>
 
           {/* MOBILE FILTER */}
@@ -677,9 +830,7 @@ export default function MyWorks() {
           >
             <Filter size={16} />
 
-            <span>
-              Filters
-            </span>
+            <span>Filters</span>
 
             <ChevronDown
               size={15}
@@ -694,7 +845,6 @@ export default function MyWorks() {
               `}
             />
           </button>
-
         </motion.div>
 
         {/* =================================================
@@ -716,7 +866,6 @@ export default function MyWorks() {
           }}
           className="mt-16 max-w-3xl"
         >
-
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-primary-light">
             Digital Invitations
           </p>
@@ -726,10 +875,10 @@ export default function MyWorks() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg">
-            Explore our collection of beautifully crafted digital
-            invitations, designed for every special occasion.
+            Explore our collection of beautifully crafted
+            digital invitations, designed for every special
+            occasion.
           </p>
-
         </motion.div>
 
         {/* =================================================
@@ -751,23 +900,18 @@ export default function MyWorks() {
           }}
           className="mt-12 hidden lg:block"
         >
-
           {/* EVENT FILTER */}
 
           <div>
-
             <div className="mb-4 flex items-center gap-2">
-
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Event
               </span>
 
               <div className="h-px flex-1 bg-white/[0.05]" />
-
             </div>
 
             <div className="flex flex-wrap gap-2">
-
               {EVENT_OPTIONS.map((event) => (
                 <FilterButton
                   key={event}
@@ -783,27 +927,21 @@ export default function MyWorks() {
                     : event}
                 </FilterButton>
               ))}
-
             </div>
-
           </div>
 
           {/* TIER FILTER */}
 
           <div className="mt-7">
-
             <div className="mb-4 flex items-center gap-2">
-
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Experience
               </span>
 
               <div className="h-px flex-1 bg-white/[0.05]" />
-
             </div>
 
             <div className="flex flex-wrap gap-2">
-
               {TIER_OPTIONS.map((tier) => (
                 <FilterButton
                   key={tier}
@@ -819,11 +957,8 @@ export default function MyWorks() {
                     : tier}
                 </FilterButton>
               ))}
-
             </div>
-
           </div>
-
         </motion.div>
 
         {/* =================================================
@@ -847,13 +982,10 @@ export default function MyWorks() {
               }}
               className="mt-6 overflow-hidden lg:hidden"
             >
-
               <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
 
                 <div className="mb-5 flex items-center justify-between">
-
                   <div className="flex items-center gap-2">
-
                     <Filter
                       size={16}
                       className="text-slate-400"
@@ -862,7 +994,6 @@ export default function MyWorks() {
                     <span className="text-sm font-semibold text-white">
                       Filters
                     </span>
-
                   </div>
 
                   <button
@@ -874,7 +1005,6 @@ export default function MyWorks() {
                   >
                     <X size={18} />
                   </button>
-
                 </div>
 
                 {/* EVENT */}
@@ -884,7 +1014,6 @@ export default function MyWorks() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-
                   {EVENT_OPTIONS.map((event) => (
                     <FilterButton
                       key={event}
@@ -900,7 +1029,6 @@ export default function MyWorks() {
                         : event}
                     </FilterButton>
                   ))}
-
                 </div>
 
                 {/* TIER */}
@@ -910,7 +1038,6 @@ export default function MyWorks() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-
                   {TIER_OPTIONS.map((tier) => (
                     <FilterButton
                       key={tier}
@@ -926,11 +1053,8 @@ export default function MyWorks() {
                         : tier}
                     </FilterButton>
                   ))}
-
                 </div>
-
               </div>
-
             </motion.div>
           )}
         </AnimatePresence>
@@ -940,19 +1064,14 @@ export default function MyWorks() {
         ================================================= */}
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-
           <p className="text-sm text-slate-500">
-
             <span className="text-white">
               {filteredProjects.length}
             </span>{" "}
-
             {filteredProjects.length === 1
               ? "invitation"
               : "invitations"}{" "}
-
             found
-
           </p>
 
           {hasActiveFilters && (
@@ -975,7 +1094,6 @@ export default function MyWorks() {
               Clear filters
             </button>
           )}
-
         </div>
 
         {/* =================================================
@@ -992,9 +1110,7 @@ export default function MyWorks() {
             lg:grid-cols-3
           "
         >
-
           <AnimatePresence mode="popLayout">
-
             {filteredProjects.map(
               (project, index) => (
                 <ProjectCard
@@ -1004,9 +1120,7 @@ export default function MyWorks() {
                 />
               )
             )}
-
           </AnimatePresence>
-
         </motion.div>
 
         {/* =================================================
@@ -1032,14 +1146,11 @@ export default function MyWorks() {
               text-center
             "
           >
-
             <div className="rounded-full border border-white/[0.07] bg-white/[0.02] p-4">
-
               <Filter
                 size={22}
                 className="text-slate-500"
               />
-
             </div>
 
             <h2 className="mt-5 text-lg font-semibold text-white">
@@ -1047,8 +1158,8 @@ export default function MyWorks() {
             </h2>
 
             <p className="mt-2 max-w-md text-sm text-slate-500">
-              There are no invitations matching the selected
-              event and experience.
+              There are no invitations matching the
+              selected event and experience.
             </p>
 
             <button
@@ -1069,7 +1180,6 @@ export default function MyWorks() {
             >
               Clear Filters
             </button>
-
           </motion.div>
         )}
 
@@ -1104,18 +1214,18 @@ export default function MyWorks() {
             sm:p-12
           "
         >
-
           <p className="text-xs font-medium uppercase tracking-[0.25em] text-primary-light">
             Have an event coming up?
           </p>
 
           <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
-            Let&apos;s create something memorable.
+            Let's create something memorable.
           </h2>
 
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-400">
             Choose the experience that fits your celebration.
-            Contact us for customization, availability and pricing.
+            Contact us for customization, availability and
+            pricing.
           </p>
 
           <a
@@ -1140,9 +1250,7 @@ export default function MyWorks() {
 
             <ArrowUpRight size={16} />
           </a>
-
         </motion.div>
-
       </div>
     </main>
   );
