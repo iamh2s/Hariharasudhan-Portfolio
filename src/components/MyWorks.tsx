@@ -300,13 +300,13 @@ const INVITATION_PROJECTS: InvitationProject[] = [
 
   {
     id: 3,
-    title: "Elegant Wedding",
+    title: "Karthick & Meenachi",
     event: "Wedding",
     tier: "Royal Heritage",
-    image: "/images/projects/wedding-classic.jpg",
+    image: "https://karthickmeenachiweddinginvitation.vercel.app/images/gallery-couple2.jpg",
     description:
       "A luxurious invitation experience designed with sophisticated royal aesthetics.",
-    link: "#",
+    link: "https://karthickmeenachiweddinginvitation.vercel.app/",
   },
 
   {
@@ -1874,3 +1874,4 @@ export default function MyWorks() {
     </main>
   );
 }
+
