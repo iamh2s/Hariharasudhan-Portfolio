@@ -12,6 +12,7 @@ import {
   Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Contact from "./Contact";
 
 /* =========================================================
    TYPES
@@ -303,10 +304,10 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Karthick & Meenachi",
     event: "Wedding",
     tier: "Royal Heritage",
-    image: "https://karthickmeenachiweddinginvitation.vercel.app/images/gallery-couple2.jpg",
+    image: "https://karthick-meenachi-wedding-invitatio.vercel.app/images/gallery-couple2.jpg",
     description:
       "A luxurious invitation experience designed with sophisticated royal aesthetics.",
-    link: "https://karthickmeenachiweddinginvitation.vercel.app/",
+    link: "https://karthick-meenachi-wedding-invitatio.vercel.app/",
   },
 
   {
@@ -1772,104 +1773,11 @@ export default function MyWorks() {
         {/* =================================================
             CONTACT CTA
         ================================================= */}
-
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 30,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-          viewport={{
-            once: true,
-            margin: "-100px",
-          }}
-          transition={{
-            duration: 0.9,
-          }}
-          className="
-            relative
-            mt-24
-            overflow-hidden
-            rounded-[30px]
-            border
-            border-white/[0.07]
-            bg-white/[0.02]
-            p-8
-            text-center
-            backdrop-blur-xl
-            sm:p-12
-          "
-        >
-          {/* CTA glow */}
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-1/2
-              top-0
-              h-40
-              w-80
-              -translate-x-1/2
-              rounded-full
-              bg-[#c9a85c]/[0.08]
-              blur-[90px]
-            "
-          />
-
-          <div className="relative z-10">
-            <p className="text-xs font-medium uppercase tracking-[0.25em] text-primary-light">
-              Have an event coming up?
-            </p>
-
-            <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
-              Let's create something memorable.
-            </h2>
-
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-400">
-              Choose the experience that fits your
-              celebration. Contact us for customization,
-              availability and pricing.
-            </p>
-
-            <motion.a
-              href="mailto:hello@example.com"
-              whileHover={{
-                y: -3,
-                scale: 1.02,
-              }}
-              whileTap={{
-                scale: 0.98,
-              }}
-              className="
-                mt-7
-                inline-flex
-                items-center
-                gap-2
-                rounded-xl
-                bg-white
-                px-6
-                py-3
-                text-sm
-                font-semibold
-                text-[#111]
-                shadow-xl
-                shadow-black/20
-                transition-all
-                hover:bg-slate-100
-              "
-            >
-              Contact Us
-
-              <ArrowUpRight size={16} />
-            </motion.a>
-          </div>
-        </motion.div>
-
+        <div className="mt-10">
+        <Contact />
+        </div>
         {/* Bottom spacing */}
-        <div className="h-20" />
+        <div className="h-2" />
       </div>
     </main>
   );
