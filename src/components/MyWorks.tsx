@@ -8,7 +8,6 @@ import {
   X,
   Crown,
   Sparkles,
-  Gem,
   Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -281,7 +280,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     event: "Wedding",
     tier: "Velvet Bloom",
     image:
-      "https://ajaywedssusmi.vercel.app/images/gallery/02.jpg",
+      "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791614863/05.png",
     description:
       "A complete cinematic wedding invitation experience with rich visual storytelling.",
     link: "https://ajaywedssusmi.vercel.app/",
@@ -304,7 +303,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     title: "Karthick & Meenachi",
     event: "Wedding",
     tier: "Royal Heritage",
-    image: "https://karthick-meenachi-wedding-invitatio.vercel.app/images/gallery-couple2.jpg",
+    image: "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791714285/couple-hero.jpg",
     description:
       "A luxurious invitation experience designed with sophisticated royal aesthetics.",
     link: "https://karthick-meenachi-wedding-invitatio.vercel.app/",
