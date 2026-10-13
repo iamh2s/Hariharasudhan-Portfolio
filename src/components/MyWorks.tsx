@@ -280,7 +280,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     event: "Wedding",
     tier: "Velvet Bloom",
     image:
-      "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791614863/05.png",
+      "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791786792/fa31fbc1-5c52-49a8-a237-b25f06684792.png",
     description:
       "A complete cinematic wedding invitation experience with rich visual storytelling.",
     link: "https://ajaywedssusmi.vercel.app/",
@@ -306,7 +306,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     image: "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791714285/couple-hero.jpg",
     description:
       "A luxurious invitation experience designed with sophisticated royal aesthetics.",
-    link: "https://karthick-meenachi-wedding-invitation-pwci3bhgw.vercel.app",
+    link: "https://karthick-meenachi-wedding-invitatio.vercel.app",
   },
 
   {
