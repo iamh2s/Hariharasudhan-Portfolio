@@ -306,7 +306,7 @@ const INVITATION_PROJECTS: InvitationProject[] = [
     image: "https://res.cloudinary.com/kpkj3xqw/image/upload/v1791714285/couple-hero.jpg",
     description:
       "A luxurious invitation experience designed with sophisticated royal aesthetics.",
-    link: "https://karthick-meenachi-wedding-invitatio.vercel.app",
+    link: "https://karthick-meenachi-wedding-invitation.invitationforyourfamily.workers.dev/",
   },
 
   {
