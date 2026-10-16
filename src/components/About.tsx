@@ -12,6 +12,8 @@ import {
 
 /* =========================================================
    PROFILE IMAGE
+   Convert myphoto.png to WebP (see commands below) and keep
+   it at about 800px wide.
 ========================================================= */
 
 const PROFILE_IMAGE = '/myphoto.png';
@@ -94,161 +96,131 @@ const floatingLabels = [
   {
     text: 'GenAI & AI Agents',
     icon: Bot,
-    position:
-      '-left-2 sm:-left-6 lg:-left-8 top-1/2 -translate-y-1/2',
+    position: '-left-2 sm:-left-6 lg:-left-8 top-1/2 -translate-y-1/2',
     delay: 0.7,
   },
   {
     text: 'Full-Stack Developer',
     icon: Code2,
-    position:
-      'bottom-10 -right-2 sm:-right-6 lg:-right-8',
+    position: 'bottom-10 -right-2 sm:-right-6 lg:-right-8',
     delay: 0.9,
   },
 ];
 
+const bioParagraphs = [
+  'I am a Computer Science graduate and AI Engineer focused on building intelligent applications that combine artificial intelligence, machine learning, automation, and modern full-stack development.',
+  'I enjoy transforming real-world problems into practical technology solutions — from AI-powered customer support systems and intelligent automation workflows to machine-learning applications and full-stack web platforms.',
+  'My current focus is on Generative AI, AI agents, workflow automation, machine learning, and building reliable applications that connect AI with real business use cases.',
+  'I continuously explore new technologies, experiment with AI systems, and improve my development skills by building practical projects.',
+];
+
+const tags = [
+  'Computer Science Graduate',
+  'AI Engineer',
+  'Open Source Contributor',
+];
+
 /* =========================================================
    HIGHLIGHT TEXT
+   Regex + lookup built once (module level), not per render.
 ========================================================= */
 
-function HighlightedText({
-  text,
-}: {
-  text: string;
-}) {
-  const keywords = [
-    'artificial intelligence',
-    'Generative AI',
-    'machine learning',
-    'AI agents',
-    'automation',
-    'full-stack development',
-    'AI-powered',
-    'intelligent automation workflows',
-    'machine-learning applications',
-    'full-stack web platforms',
-    'AI Engineer',
-    'Computer Science',
-  ];
+const KEYWORDS = [
+  'artificial intelligence',
+  'Generative AI',
+  'machine learning',
+  'AI agents',
+  'automation',
+  'full-stack development',
+  'AI-powered',
+  'intelligent automation workflows',
+  'machine-learning applications',
+  'full-stack web platforms',
+  'AI Engineer',
+  'Computer Science',
+];
 
-  const regex = new RegExp(
-    `(${keywords.join('|')})`,
-    'gi'
-  );
+const KEYWORD_SET = new Set(KEYWORDS.map((k) => k.toLowerCase()));
+const KEYWORD_REGEX = new RegExp(`(${KEYWORDS.join('|')})`, 'gi');
 
-  const parts = text.split(regex);
+function HighlightedText({ text }: { text: string }) {
+  const parts = text.split(KEYWORD_REGEX);
 
   return (
     <>
-      {parts.map((part, index) => {
-        const isKeyword = keywords.some(
-          (keyword) =>
-            keyword.toLowerCase() ===
-            part.toLowerCase()
-        );
-
-        if (isKeyword) {
-          return (
-            <span
-              key={index}
-              className="font-medium text-slate-200"
-            >
-              {part}
-            </span>
-          );
-        }
-
-        return <span key={index}>{part}</span>;
-      })}
+      {parts.map((part, index) =>
+        KEYWORD_SET.has(part.toLowerCase()) ? (
+          <span key={index} className="font-medium text-slate-200">
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
     </>
   );
 }
 
 /* =========================================================
-   SIMPLE REVEAL
+   ANIMATION VARIANTS
 ========================================================= */
 
 const revealFromRight = {
-  hidden: {
-    opacity: 0,
-    x: 70,
-  },
-
-  visible: {
-    opacity: 1,
-    x: 0,
-  },
+  hidden: { opacity: 0, x: 70 },
+  visible: { opacity: 1, x: 0 },
 };
 
 const revealFromLeft = {
-  hidden: {
-    opacity: 0,
-    x: -50,
-  },
+  hidden: { opacity: 0, x: -50 },
+  visible: { opacity: 1, x: 0 },
+};
 
+/* One observer per group, children are staggered */
+
+const groupVariants = (stagger: number, delayChildren = 0) => ({
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: stagger, delayChildren },
+  },
+});
+
+const itemVariants = {
+  hidden: { opacity: 0, x: 70 },
   visible: {
     opacity: 1,
     x: 0,
+    transition: { duration: 0.6, ease: 'easeOut' as const },
   },
 };
+
+const viewportOnce = { once: true, amount: 0.12 };
 
 /* =========================================================
    ABOUT
 ========================================================= */
 
 export default function About() {
-  const bioParagraphs = [
-    'I am a Computer Science graduate and AI Engineer focused on building intelligent applications that combine artificial intelligence, machine learning, automation, and modern full-stack development.',
-
-    'I enjoy transforming real-world problems into practical technology solutions — from AI-powered customer support systems and intelligent automation workflows to machine-learning applications and full-stack web platforms.',
-
-    'My current focus is on Generative AI, AI agents, workflow automation, machine learning, and building reliable applications that connect AI with real business use cases.',
-
-    'I continuously explore new technologies, experiment with AI systems, and improve my development skills by building practical projects.',
-  ];
-
   return (
     <section
       id="about"
       className="relative overflow-hidden py-28 lg:py-40"
     >
-      {/* =====================================================
-          BACKGROUND
-      ====================================================== */}
+      {/* Background orbs: hidden on mobile (expensive blur) */}
 
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0 hidden md:block">
         <div className="absolute -left-64 top-20 h-[450px] w-[450px] rounded-full bg-primary/[0.015] blur-[120px]" />
-
         <div className="absolute -right-48 bottom-20 h-[350px] w-[350px] rounded-full bg-accent/[0.01] blur-[100px]" />
       </div>
 
-      {/* =====================================================
-          MAIN CONTENT
-
-          IMPORTANT:
-          No useScroll.
-          No sticky.
-          No transform connected to page scroll.
-      ====================================================== */}
-
       <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-
-        {/* =================================================
-            HEADER
-        ================================================== */}
+        {/* HEADER */}
 
         <motion.div
           variants={revealFromRight}
           initial="hidden"
           whileInView="visible"
-          viewport={{
-            once: true,
-            amount: 0.15,
-          }}
-          transition={{
-            duration: 0.7,
-            ease: 'easeOut',
-          }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
           className="mb-6"
         >
           <span className="mb-3 inline-block font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
@@ -260,289 +232,148 @@ export default function About() {
           </h2>
         </motion.div>
 
-        {/* =================================================
-            SUBTITLE
-        ================================================== */}
-
         <motion.p
           variants={revealFromRight}
           initial="hidden"
           whileInView="visible"
-          viewport={{
-            once: true,
-            amount: 0.15,
-          }}
-          transition={{
-            duration: 0.7,
-            delay: 0.1,
-            ease: 'easeOut',
-          }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
           className="mb-16 max-w-xl text-[15px] text-slate-400 lg:mb-20"
         >
-          Turning ideas into intelligent digital
-          solutions.
+          Turning ideas into intelligent digital solutions.
         </motion.p>
 
-        {/* =================================================
-            PORTRAIT + BIO
-        ================================================== */}
+        {/* PORTRAIT + BIO */}
 
         <div className="mb-28 grid items-start gap-14 lg:mb-36 lg:grid-cols-[42%_1fr] xl:gap-20">
-
-          {/* =================================================
-              PHOTO
-          ================================================== */}
+          {/* PHOTO */}
 
           <div className="relative mx-auto w-full max-w-sm lg:mx-0">
-
-            {/* Glow */}
-
             <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.9,
-              }}
-              whileInView={{
-                opacity: 1,
-                scale: 1,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                duration: 0.8,
-              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.8 }}
               className="pointer-events-none absolute -inset-5 rounded-3xl bg-gradient-to-br from-primary/[0.04] via-transparent to-accent/[0.03] blur-2xl"
             />
-
-            {/* =================================================
-                PROFILE IMAGE
-
-                No clipPath.
-                No parallax.
-                No sticky.
-            ================================================== */}
 
             <motion.div
               variants={revealFromLeft}
               initial="hidden"
               whileInView="visible"
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                duration: 0.8,
-                ease: 'easeOut',
-              }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
               className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/[0.05]"
             >
               <img
                 src={PROFILE_IMAGE}
                 alt="P.S. Hariharasudhan"
+                width={600}
+                height={800}
+                loading="lazy"
+                decoding="async"
                 className="relative z-10 h-full w-full object-cover"
-                onError={(event) => {
-                  console.error(
-                    'Profile image failed to load:',
-                    event.currentTarget.src
-                  );
-                }}
               />
 
               <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-dark/30 via-transparent to-dark/10" />
             </motion.div>
 
-            {/* =================================================
-                CORNER MARKS
-            ================================================== */}
+            {/* Corner marks */}
 
             <motion.div
-              initial={{
-                opacity: 0,
-              }}
-              whileInView={{
-                opacity: 1,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                delay: 0.4,
-                duration: 0.4,
-              }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
               className="absolute -left-2 -top-2 z-30 h-6 w-6 rounded-tl-md border-l border-t border-white/[0.08]"
             />
 
             <motion.div
-              initial={{
-                opacity: 0,
-              }}
-              whileInView={{
-                opacity: 1,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                delay: 0.5,
-                duration: 0.4,
-              }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
               className="absolute -bottom-2 -right-2 z-30 h-6 w-6 rounded-br-md border-b border-r border-white/[0.08]"
             />
 
-            {/* =================================================
-                FLOATING LABELS
-            ================================================== */}
+            {/* Floating labels */}
 
-            {floatingLabels.map(
-              ({
-                text,
-                icon: Icon,
-                position,
-                delay,
-              }) => (
-                <motion.div
-                  key={text}
-                  variants={revealFromRight}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{
-                    once: true,
-                    amount: 0.15,
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    delay,
-                    ease: 'easeOut',
-                  }}
-                  className={`absolute ${position} z-40 mt-2`}
-                >
-                  <div className="glass flex items-center gap-2 rounded-lg px-1 py-1 shadow-lg shadow-black/30">
-                    <Icon
-                      size={12}
-                      className="shrink-0 text-primary-light"
-                  
-                    />
+            {floatingLabels.map(({ text, icon: Icon, position, delay }) => (
+              <motion.div
+                key={text}
+                variants={revealFromRight}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+                className={`absolute ${position} z-40 mt-2`}
+              >
+                <div className="glass flex items-center gap-2 rounded-lg px-1 py-1 shadow-lg shadow-black/30">
+                  <Icon size={12} className="shrink-0 text-primary-light" />
 
-                    <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-wider text-slate-300">
-                      {text}
-                    </span>
-                  </div>
-                </motion.div>
-              )
-            )}
+                  <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-wider text-slate-300">
+                    {text}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </div>
 
-          {/* =================================================
-              BIO
-          ================================================== */}
+          {/* BIO */}
 
           <div className="lg:pt-2">
-
-            {/* Name */}
-
             <motion.h3
               variants={revealFromRight}
               initial="hidden"
               whileInView="visible"
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                duration: 0.7,
-                delay: 0.15,
-                ease: 'easeOut',
-              }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
               className="mb-7 font-display text-2xl font-bold leading-snug tracking-tight text-white sm:text-3xl"
             >
               P.S. Hariharasudhan
             </motion.h3>
 
-            {/* Paragraphs */}
-
-            {bioParagraphs.map(
-              (text, index) => (
-                <motion.p
-                  key={index}
-                  variants={revealFromRight}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{
-                    once: true,
-                    amount: 0.12,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay:
-                      0.2 + index * 0.1,
-                    ease: 'easeOut',
-                  }}
-                  className="mb-4 text-[14.5px] leading-[1.75] text-slate-300"
-                >
-                  <HighlightedText
-                    text={text}
-                  />
-                </motion.p>
-              )
-            )}
-
-            {/* Separator */}
+            {/* Paragraphs: one observer, staggered */}
 
             <motion.div
-              initial={{
-                opacity: 0,
-                scaleX: 0,
-              }}
-              whileInView={{
-                opacity: 1,
-                scaleX: 1,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.2,
-              }}
-              transition={{
-                duration: 0.6,
-                delay: 0.4,
-              }}
+              variants={groupVariants(0.1, 0.2)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+            >
+              {bioParagraphs.map((text, index) => (
+                <motion.p
+                  key={index}
+                  variants={itemVariants}
+                  className="mb-4 text-[14.5px] leading-[1.75] text-slate-300"
+                >
+                  <HighlightedText text={text} />
+                </motion.p>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
               className="my-8 h-px max-w-xs origin-left bg-gradient-to-r from-white/[0.06] to-transparent"
             />
-
-            {/* Tags */}
 
             <motion.div
               variants={revealFromRight}
               initial="hidden"
               whileInView="visible"
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                duration: 0.6,
-                delay: 0.5,
-                ease: 'easeOut',
-              }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
               className="flex flex-wrap gap-2"
             >
-              {[
-                'Computer Science Graduate',
-                'AI Engineer',
-                'Open Source Contributor',
-              ].map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.05] bg-white/[0.01] px-3 py-1.5 text-[11px] font-medium tracking-wide text-slate-500"
                 >
-                  <Cpu
-                    size={10}
-                    className="text-primary-light opacity-60"
-                  />
-
+                  <Cpu size={10} className="text-primary-light opacity-60" />
                   {tag}
                 </span>
               ))}
@@ -550,24 +381,15 @@ export default function About() {
           </div>
         </div>
 
-        {/* =================================================
-            WHAT I FOCUS ON
-        ================================================== */}
+        {/* WHAT I FOCUS ON */}
 
         <div className="mb-28 lg:mb-36">
-
           <motion.div
             variants={revealFromRight}
             initial="hidden"
             whileInView="visible"
-            viewport={{
-              once: true,
-              amount: 0.15,
-            }}
-            transition={{
-              duration: 0.7,
-              ease: 'easeOut',
-            }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
             className="mb-10"
           >
             <span className="mb-3 inline-block font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
@@ -579,44 +401,25 @@ export default function About() {
             </h3>
           </motion.div>
 
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <motion.div
+            variants={groupVariants(0.08)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="grid gap-3.5 sm:grid-cols-2"
+          >
             {focusAreas.map(
-              (
-                {
-                  icon: Icon,
-                  title,
-                  description,
-                  accent,
-                  accentBg,
-                },
-                index
-              ) => (
+              ({ icon: Icon, title, description, accent, accentBg }) => (
                 <motion.div
                   key={title}
-                  variants={revealFromRight}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{
-                    once: true,
-                    amount: 0.12,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: index * 0.08,
-                    ease: 'easeOut',
-                  }}
-                  whileHover={{
-                    y: -5,
-                  }}
+                  variants={itemVariants}
+                  whileHover={{ y: -5 }}
                   className="group rounded-2xl border border-white/[0.04] bg-white/[0.01] p-6 transition-colors duration-300 hover:bg-white/[0.025]"
                 >
                   <div
                     className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${accentBg} transition-transform duration-300 group-hover:scale-105`}
                   >
-                    <Icon
-                      size={18}
-                      className={accent}
-                    />
+                    <Icon size={18} className={accent} />
                   </div>
 
                   <h4 className="mb-2 font-display text-[15px] font-semibold tracking-tight text-white">
@@ -629,27 +432,18 @@ export default function About() {
                 </motion.div>
               )
             )}
-          </div>
+          </motion.div>
         </div>
 
-        {/* =================================================
-            HOW I BUILD
-        ================================================== */}
+        {/* HOW I BUILD */}
 
         <div>
-
           <motion.div
             variants={revealFromRight}
             initial="hidden"
             whileInView="visible"
-            viewport={{
-              once: true,
-              amount: 0.15,
-            }}
-            transition={{
-              duration: 0.7,
-              ease: 'easeOut',
-            }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
             className="mb-10"
           >
             <span className="mb-3 inline-block font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
@@ -661,56 +455,38 @@ export default function About() {
             </h3>
           </motion.div>
 
-          <div className="grid gap-3.5 md:grid-cols-3">
-            {principles.map(
-              (
-                {
-                  step,
-                  title,
-                  description,
-                },
-                index
-              ) => (
-                <motion.div
-                  key={step}
-                  variants={revealFromRight}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{
-                    once: true,
-                    amount: 0.12,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: index * 0.1,
-                    ease: 'easeOut',
-                  }}
-                  whileHover={{
-                    y: -5,
-                  }}
-                  className="group rounded-2xl border border-white/[0.04] bg-white/[0.01] p-6 transition-colors duration-300 hover:bg-white/[0.025]"
-                >
-                  {/* Step */}
+          <motion.div
+            variants={groupVariants(0.1)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="grid gap-3.5 md:grid-cols-3"
+          >
+            {principles.map(({ step, title, description }) => (
+              <motion.div
+                key={step}
+                variants={itemVariants}
+                whileHover={{ y: -5 }}
+                className="group rounded-2xl border border-white/[0.04] bg-white/[0.01] p-6 transition-colors duration-300 hover:bg-white/[0.025]"
+              >
+                <div className="mb-4 flex items-baseline gap-3">
+                  <span className="font-mono text-[11px] font-medium tracking-wider text-primary-light/60">
+                    {step}
+                  </span>
 
-                  <div className="mb-4 flex items-baseline gap-3">
-                    <span className="font-mono text-[11px] font-medium tracking-wider text-primary-light/60">
-                      {step}
-                    </span>
+                  <div className="h-px flex-1 bg-white/[0.04] transition-colors group-hover:bg-white/[0.07]" />
+                </div>
 
-                    <div className="h-px flex-1 bg-white/[0.04] transition-colors group-hover:bg-white/[0.07]" />
-                  </div>
+                <h4 className="mb-2.5 font-display text-lg font-semibold tracking-tight text-white">
+                  {title}
+                </h4>
 
-                  <h4 className="mb-2.5 font-display text-lg font-semibold tracking-tight text-white">
-                    {title}
-                  </h4>
-
-                  <p className="text-[13px] leading-relaxed text-slate-500">
-                    {description}
-                  </p>
-                </motion.div>
-              )
-            )}
-          </div>
+                <p className="text-[13px] leading-relaxed text-slate-500">
+                  {description}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>

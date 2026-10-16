@@ -1,86 +1,75 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowUp, Heart } from 'lucide-react';
+
+import { ArrowUp, Heart } from "lucide-react";
 
 const links = [
-  { name: 'Home', href: '#home' },
-  { name: 'About', href: '#about' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Contact', href: '#contact' },
+  { name: "Home", href: "#home" },
+  { name: "About", href: "#about" },
+  { name: "Skills", href: "#skills" },
+  { name: "Projects", href: "#projects" },
+  { name: "Contact", href: "#contact" },
 ];
 
 export default function Footer() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-30px' });
-
   return (
-    <footer ref={ref} className="relative border-t border-white/[0.04]">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+    <footer className="relative border-t border-white/[0.04]">
+      {/* Top accent line */}
+      <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="flex flex-col sm:flex-row items-center justify-between gap-6"
-        >
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           {/* Logo */}
-          <motion.a
+          <a
             href="#home"
-            whileHover={{ scale: 1.05 }}
-            className="font-display font-bold text-lg text-white tracking-tight"
+            className="font-display text-lg font-bold tracking-tight text-white"
+            aria-label="H2S - Back to home"
           >
             H2S<span className="text-primary">.</span>
-          </motion.a>
+          </a>
 
-          {/* Links */}
-          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-            {links.map((l, i) => (
-              <motion.a
-                key={l.name}
-                href={l.href}
-                initial={{ opacity: 0, y: 10 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
-                whileHover={{ y: -2, color: '#e2e8f0' }}
-                className="text-[13px] text-slate-500 transition-colors font-medium"
+          {/* Navigation links */}
+          <nav
+            aria-label="Footer navigation"
+            className="flex flex-wrap justify-center gap-x-5 gap-y-3"
+          >
+            {links.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="text-[13px] font-medium text-slate-500 transition-colors duration-150 hover:text-slate-200"
               >
-                {l.name}
-              </motion.a>
+                {link.name}
+              </a>
             ))}
-          </div>
+          </nav>
 
           {/* Back to top */}
-          <motion.a
+          <a
             href="#home"
-            whileHover={{ y: -3, scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-slate-500 hover:text-white hover:border-white/[0.12] transition-colors"
             aria-label="Back to top"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04] text-slate-400 transition-colors duration-150 hover:border-white/[0.12] hover:text-white"
           >
             <ArrowUp size={15} />
-          </motion.a>
-        </motion.div>
+          </a>
+        </div>
 
         {/* Copyright */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8 pt-6 border-t border-white/[0.03] text-center"
-        >
-          <p className="text-[12px] text-slate-600 flex items-center justify-center gap-1.5">
-            &copy; {new Date().getFullYear()} P.S. Hariharasudhan. Crafted with
-            <motion.span
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-            >
-              <Heart size={11} className="text-red-500/60 fill-red-500/60" />
-            </motion.span>
-            and code.
+        <div className="mt-8 border-t border-white/[0.05] pt-6 text-center">
+          <p className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-500">
+            <span>
+              &copy; {new Date().getFullYear()} P.S. Hariharasudhan.
+            </span>
+
+            <span>Crafted with</span>
+
+            <Heart
+              size={12}
+              aria-label="love"
+              className="fill-red-500/60 text-red-500/60"
+            />
+
+            <span>and code.</span>
           </p>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

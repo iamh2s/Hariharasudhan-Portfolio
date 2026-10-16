@@ -9,9 +9,6 @@ interface PreloaderProps {
 
 const quotes = [
   "Every expert was once a beginner, but they never quit learning.",
-  "Success is the sum of small efforts, repeated day in and day out.",
-  "The best way to predict the future is to create it.",
-  "Keep learning, keep building, and never stop improving.",
 ];
 
 export default function Preloader({

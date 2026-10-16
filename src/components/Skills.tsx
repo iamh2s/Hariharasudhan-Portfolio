@@ -1,39 +1,42 @@
 import {
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
-  useCallback,
   type ReactNode,
 } from 'react';
-
 import { createPortal } from 'react-dom';
-
 import {
-  motion,
-  useInView,
   AnimatePresence,
+  motion,
+  useAnimationFrame,
+  useInView,
   useMotionValue,
-  useTransform,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
   useSpring,
+  useTransform,
+  useVelocity,
+  type Variants,
 } from 'framer-motion';
-
 import {
+  BarChart3,
+  Bot,
   Brain,
   Code2,
   Database,
+  FlaskConical,
+  Sparkles,
   Workflow,
   Wrench,
-  Sparkles,
-  Bot,
-  BarChart3,
-  FlaskConical,
 } from 'lucide-react';
-
 import type { LucideIcon } from 'lucide-react';
 
-/* ═══════════════════════════════════════════════
-   TYPES
-   ═══════════════════════════════════════════════ */
+/* -------------------------------------------------------------------------- */
+/*  Data                                                                      */
+/* -------------------------------------------------------------------------- */
 
 interface Skill {
   name: string;
@@ -41,7 +44,7 @@ interface Skill {
 }
 
 interface Category {
-  step: string;
+  id: string;
   title: string;
   icon: LucideIcon;
   accent: string;
@@ -51,11 +54,9 @@ interface Category {
   skills: Skill[];
 }
 
-/* ═══════════════════════════════════════════════
-   CORE EXPERTISE
-   ═══════════════════════════════════════════════ */
+const EASE = [0.22, 1, 0.36, 1] as const;
 
-const coreExpertise = [
+const coreExpertise: { label: string; icon: LucideIcon }[] = [
   { label: 'AI Engineering', icon: Brain },
   { label: 'Generative AI', icon: Sparkles },
   { label: 'AI Agents', icon: Bot },
@@ -64,451 +65,201 @@ const coreExpertise = [
   { label: 'Workflow Automation', icon: Workflow },
 ];
 
-/* ═══════════════════════════════════════════════
-   CATEGORIES
-   ═══════════════════════════════════════════════ */
-
 const categories: Category[] = [
   {
-    step: '01',
+    id: 'ai',
     title: 'Artificial Intelligence & Generative AI',
     icon: Brain,
-    accent: 'text-indigo-500',
-    accentBg: 'bg-indigo-900/[10]',
-    accentBorder: 'border-indigo-500/[0.01]',
+    accent: 'text-indigo-400',
+    accentBg: 'bg-indigo-500/10',
+    accentBorder: 'border-indigo-400/25',
     primary: true,
     skills: [
-      {
-        name: 'Generative AI',
-        tip: 'Building applications powered by generative models for content creation, code generation, and intelligent assistants.',
-      },
-      {
-        name: 'Large Language Models',
-        tip: 'Working with GPT, LLaMA, and open-source LLMs for text generation, reasoning, and conversational AI.',
-      },
-      {
-        name: 'AI Agents',
-        tip: 'Developing autonomous AI agents that reason, plan, and execute multi-step tasks.',
-      },
-      {
-        name: 'Multi-Agent Systems',
-        tip: 'Orchestrating multiple AI agents to collaborate and solve complex problems together.',
-      },
-      {
-        name: 'Prompt Engineering',
-        tip: 'Crafting optimized prompts and system instructions for reliable LLM output.',
-      },
-      {
-        name: 'LangChain',
-        tip: 'Building LLM-powered chains, agents, and retrieval pipelines for production AI apps.',
-      },
-      {
-        name: 'Groq API',
-        tip: 'Leveraging Groq for ultra-fast LLM inference in real-time AI applications.',
-      },
-      {
-        name: 'RAG Concepts',
-        tip: 'Implementing Retrieval-Augmented Generation for knowledge-grounded AI responses.',
-      },
-      {
-        name: 'AI Workflow Automation',
-        tip: 'Connecting AI models with business processes through automated pipelines.',
-      },
+      { name: 'Generative AI', tip: 'Building applications powered by generative models for content creation, code generation, and intelligent assistants.' },
+      { name: 'Large Language Models', tip: 'Working with GPT, LLaMA, and open-source LLMs for text generation, reasoning, and conversational AI.' },
+      { name: 'AI Agents', tip: 'Developing autonomous AI agents that reason, plan, and execute multi-step tasks.' },
+      { name: 'Multi-Agent Systems', tip: 'Orchestrating multiple AI agents to collaborate and solve complex problems together.' },
+      { name: 'Prompt Engineering', tip: 'Crafting optimized prompts and system instructions for reliable LLM output.' },
+      { name: 'LangChain', tip: 'Building LLM-powered chains, agents, and retrieval pipelines for production AI apps.' },
+      { name: 'Groq API', tip: 'Leveraging Groq for ultra-fast LLM inference in real-time AI applications.' },
+      { name: 'RAG Concepts', tip: 'Implementing Retrieval-Augmented Generation for knowledge-grounded AI responses.' },
+      { name: 'AI Workflow Automation', tip: 'Connecting AI models with business processes through automated pipelines.' },
     ],
   },
-
   {
-    step: '02',
+    id: 'ml',
     title: 'Machine Learning & Data Science',
     icon: FlaskConical,
     accent: 'text-violet-400',
     accentBg: 'bg-violet-400/[0.08]',
     accentBorder: 'border-violet-400/[0.12]',
     skills: [
-      {
-        name: 'Python',
-        tip: 'Primary language for ML, data science, and backend development.',
-      },
-      {
-        name: 'Pandas',
-        tip: 'Data manipulation and analysis for preprocessing ML datasets.',
-      },
-      {
-        name: 'NumPy',
-        tip: 'Numerical computing for matrix operations and scientific calculations.',
-      },
-      {
-        name: 'Scikit-learn',
-        tip: 'Building classification, regression, and clustering models.',
-      },
-      {
-        name: 'TensorFlow',
-        tip: 'Used for deep-learning and image-classification projects.',
-      },
-      {
-        name: 'Keras',
-        tip: 'High-level API for rapid neural network prototyping.',
-      },
-      {
-        name: 'Matplotlib',
-        tip: 'Creating visualizations for data analysis and model evaluation.',
-      },
-      {
-        name: 'Seaborn',
-        tip: 'Statistical data visualization for exploratory analysis.',
-      },
-      {
-        name: 'K-Means',
-        tip: 'Unsupervised clustering for customer segmentation and pattern discovery.',
-      },
-      {
-        name: 'DBSCAN',
-        tip: 'Density-based clustering for anomaly detection and spatial analysis.',
-      },
-      {
-        name: 'Classification',
-        tip: 'Building models for sentiment analysis, spam detection, and category prediction.',
-      },
-      {
-        name: 'Regression',
-        tip: 'Predictive modeling for price estimation and trend forecasting.',
-      },
-      {
-        name: 'Recommendation Systems',
-        tip: 'Collaborative and content-based filtering for personalized suggestions.',
-      },
-      {
-        name: 'Feature Engineering',
-        tip: 'Transforming raw data into meaningful features for better model performance.',
-      },
-      {
-        name: 'Data Preprocessing',
-        tip: 'Cleaning, normalizing, and preparing datasets for ML pipelines.',
-      },
+      { name: 'Python', tip: 'Primary language for ML, data science, and backend development.' },
+      { name: 'Pandas', tip: 'Data manipulation and analysis for preprocessing ML datasets.' },
+      { name: 'NumPy', tip: 'Numerical computing for matrix operations and scientific calculations.' },
+      { name: 'Scikit-learn', tip: 'Building classification, regression, and clustering models.' },
+      { name: 'TensorFlow', tip: 'Used for deep-learning and image-classification projects.' },
+      { name: 'Keras', tip: 'High-level API for rapid neural network prototyping.' },
+      { name: 'Matplotlib', tip: 'Creating visualizations for data analysis and model evaluation.' },
+      { name: 'Seaborn', tip: 'Statistical data visualization for exploratory analysis.' },
+      { name: 'K-Means', tip: 'Unsupervised clustering for customer segmentation and pattern discovery.' },
+      { name: 'DBSCAN', tip: 'Density-based clustering for anomaly detection and spatial analysis.' },
+      { name: 'Classification', tip: 'Building models for sentiment analysis, spam detection, and category prediction.' },
+      { name: 'Regression', tip: 'Predictive modeling for price estimation and trend forecasting.' },
+      { name: 'Recommendation Systems', tip: 'Collaborative and content-based filtering for personalized suggestions.' },
+      { name: 'Feature Engineering', tip: 'Transforming raw data into meaningful features for better model performance.' },
+      { name: 'Data Preprocessing', tip: 'Cleaning, normalizing, and preparing datasets for ML pipelines.' },
     ],
   },
-
   {
-    step: '03',
+    id: 'fullstack',
     title: 'Full-Stack Development',
     icon: Code2,
     accent: 'text-cyan-400',
     accentBg: 'bg-cyan-400/[0.08]',
     accentBorder: 'border-cyan-400/[0.12]',
     skills: [
-      {
-        name: 'JavaScript',
-        tip: 'Core language for interactive frontend and Node.js backend development.',
-      },
-      {
-        name: 'React.js',
-        tip: 'Building component-driven, interactive user interfaces.',
-      },
-      {
-        name: 'Next.js',
-        tip: 'Used to build modern production-oriented full-stack applications.',
-      },
-      {
-        name: 'Vite',
-        tip: 'Fast build tool for modern frontend development workflows.',
-      },
-      {
-        name: 'HTML',
-        tip: 'Semantic markup for accessible and structured web pages.',
-      },
-      {
-        name: 'CSS',
-        tip: 'Styling and layout for responsive web interfaces.',
-      },
-      {
-        name: 'Tailwind CSS',
-        tip: 'Utility-first CSS framework for rapid, consistent UI development.',
-      },
-      {
-        name: 'Bootstrap',
-        tip: 'Component library for responsive prototyping and layout scaffolding.',
-      },
-      {
-        name: 'Django',
-        tip: 'Full-featured Python web framework for backend applications and APIs.',
-      },
-      {
-        name: 'Django REST Framework',
-        tip: 'Building robust RESTful APIs for frontend-backend communication.',
-      },
-      {
-        name: 'REST APIs',
-        tip: 'Designing and consuming APIs that connect frontends, services, and AI models.',
-      },
+      { name: 'JavaScript', tip: 'Core language for interactive frontend and Node.js backend development.' },
+      { name: 'React.js', tip: 'Building component-driven, interactive user interfaces.' },
+      { name: 'Next.js', tip: 'Used to build modern production-oriented full-stack applications.' },
+      { name: 'Vite', tip: 'Fast build tool for modern frontend development workflows.' },
+      { name: 'HTML', tip: 'Semantic markup for accessible and structured web pages.' },
+      { name: 'CSS', tip: 'Styling and layout for responsive web interfaces.' },
+      { name: 'Tailwind CSS', tip: 'Utility-first CSS framework for rapid, consistent UI development.' },
+      { name: 'Bootstrap', tip: 'Component library for responsive prototyping and layout scaffolding.' },
+      { name: 'Django', tip: 'Full-featured Python web framework for backend applications and APIs.' },
+      { name: 'Django REST Framework', tip: 'Building robust RESTful APIs for frontend-backend communication.' },
+      { name: 'REST APIs', tip: 'Designing and consuming APIs that connect frontends, services, and AI models.' },
     ],
   },
-
   {
-    step: '04',
+    id: 'db',
     title: 'Databases',
     icon: Database,
     accent: 'text-emerald-400',
     accentBg: 'bg-emerald-400/[0.08]',
     accentBorder: 'border-emerald-400/[0.12]',
     skills: [
-      {
-        name: 'PostgreSQL',
-        tip: 'Primary relational database for production applications and complex queries.',
-      },
-      {
-        name: 'MySQL',
-        tip: 'Relational database used in web applications and data storage.',
-      },
-      {
-        name: 'SQLite',
-        tip: 'Lightweight database for local development and embedded applications.',
-      },
+      { name: 'PostgreSQL', tip: 'Primary relational database for production applications and complex queries.' },
+      { name: 'MySQL', tip: 'Relational database used in web applications and data storage.' },
+      { name: 'SQLite', tip: 'Lightweight database for local development and embedded applications.' },
     ],
   },
-
   {
-    step: '05',
+    id: 'automation',
     title: 'Automation & Integration',
     icon: Workflow,
     accent: 'text-amber-400',
     accentBg: 'bg-amber-400/[0.08]',
     accentBorder: 'border-amber-400/[0.12]',
     skills: [
-      {
-        name: 'n8n',
-        tip: 'Used to build AI-powered automation and multi-agent workflows.',
-      },
-      {
-        name: 'HTTP APIs',
-        tip: 'Connecting services and systems through RESTful HTTP communication.',
-      },
-      {
-        name: 'Webhooks',
-        tip: 'Event-driven integrations for real-time system communication.',
-      },
-      {
-        name: 'API Integration',
-        tip: 'Connecting third-party APIs into applications and automation flows.',
-      },
-      {
-        name: 'Workflow Automation',
-        tip: 'Designing end-to-end automated pipelines for business processes.',
-      },
-      {
-        name: 'WhatsApp Integration',
-        tip: 'Connecting AI assistants and chatbots to WhatsApp for customer communication.',
-      },
+      { name: 'n8n', tip: 'Used to build AI-powered automation and multi-agent workflows.' },
+      { name: 'HTTP APIs', tip: 'Connecting services and systems through RESTful HTTP communication.' },
+      { name: 'Webhooks', tip: 'Event-driven integrations for real-time system communication.' },
+      { name: 'API Integration', tip: 'Connecting third-party APIs into applications and automation flows.' },
+      { name: 'Workflow Automation', tip: 'Designing end-to-end automated pipelines for business processes.' },
+      { name: 'WhatsApp Integration', tip: 'Connecting AI assistants and chatbots to WhatsApp for customer communication.' },
     ],
   },
-
   {
-    step: '06',
+    id: 'tools',
     title: 'Tools & Platforms',
     icon: Wrench,
     accent: 'text-slate-400',
     accentBg: 'bg-slate-400/[0.06]',
     accentBorder: 'border-slate-400/[0.10]',
     skills: [
-      {
-        name: 'Git',
-        tip: 'Version control for collaborative and individual development workflows.',
-      },
-      {
-        name: 'GitHub',
-        tip: 'Code hosting, collaboration, and open-source project management.',
-      },
-      {
-        name: 'VS Code',
-        tip: 'Primary code editor with custom extensions and configurations.',
-      },
-      {
-        name: 'Streamlit',
-        tip: 'Building interactive data apps and ML dashboards in Python.',
-      },
-      {
-        name: 'Google Colab',
-        tip: 'Cloud-based notebooks for ML experimentation and GPU-accelerated training.',
-      },
-      {
-        name: 'Vercel',
-        tip: 'Deploying and hosting modern frontend and full-stack applications.',
-      },
-      {
-        name: 'Hugging Face',
-        tip: 'Accessing and deploying open-source AI models and datasets.',
-      },
+      { name: 'Git', tip: 'Version control for collaborative and individual development workflows.' },
+      { name: 'GitHub', tip: 'Code hosting, collaboration, and open-source project management.' },
+      { name: 'VS Code', tip: 'Primary code editor with custom extensions and configurations.' },
+      { name: 'Streamlit', tip: 'Building interactive data apps and ML dashboards in Python.' },
+      { name: 'Google Colab', tip: 'Cloud-based notebooks for ML experimentation and GPU-accelerated training.' },
+      { name: 'Vercel', tip: 'Deploying and hosting modern frontend and full-stack applications.' },
+      { name: 'Hugging Face', tip: 'Accessing and deploying open-source AI models and datasets.' },
     ],
   },
 ];
 
-/* ═══════════════════════════════════════════════
-   VIEWPORT HEIGHT
-   ═══════════════════════════════════════════════ */
+/* -------------------------------------------------------------------------- */
+/*  Hooks                                                                     */
+/* -------------------------------------------------------------------------- */
 
-function useViewportHeight() {
-  const [vh, setVh] = useState(
-    typeof window !== 'undefined'
-      ? window.innerHeight
-      : 800
-  );
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
 
   useEffect(() => {
-    const update = () => {
-      setVh(window.innerHeight);
-    };
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
 
-    window.addEventListener('resize', update, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener('resize', update);
-    };
-  }, []);
-
-  return vh;
+  return matches;
 }
 
-/* ═══════════════════════════════════════════════
-   SCROLL ROW
-   ═══════════════════════════════════════════════ */
+const wrap = (min: number, max: number, v: number) => {
+  const range = max - min;
+  return ((((v - min) % range) + range) % range) + min;
+};
 
-function ScrollRow({
+/* -------------------------------------------------------------------------- */
+/*  Marquee: drifts on its own, speeds up and follows the scroll direction    */
+/* -------------------------------------------------------------------------- */
+
+function Marquee({
   children,
-  sensitivity = 0.6,
-  gapClassName = 'gap-2.5',
+  speed = 28,
+  reverse = false,
 }: {
   children: ReactNode;
-  sensitivity?: number;
-  gapClassName?: string;
+  speed?: number; // px per second
+  reverse?: boolean;
 }) {
-  const measureRef = useRef<HTMLDivElement>(null);
-  const [singleWidth, setSingleWidth] = useState(0);
+  const reduceMotion = useReducedMotion();
+  const copyRef = useRef<HTMLDivElement>(null);
+  const [copyWidth, setCopyWidth] = useState(0);
+  const x = useMotionValue(0);
+  const direction = useRef(reverse ? -1 : 1);
 
-  const rawScroll = useMotionValue(0);
-
-  const smoothScroll = useSpring(rawScroll, {
-    stiffness: 300,
-    damping: 50,
-    mass: 0.4,
+  const { scrollY } = useScroll();
+  const velocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(velocity, { damping: 50, stiffness: 400 });
+  const boost = useTransform(smoothVelocity, [-1500, 0, 1500], [-4, 0, 4], {
+    clamp: false,
   });
 
-  useEffect(() => {
-    const measure = () => {
-      if (measureRef.current) {
-        setSingleWidth(
-          measureRef.current.scrollWidth
-        );
-      }
-    };
-
+  useLayoutEffect(() => {
+    const el = copyRef.current;
+    if (!el) return;
+    const measure = () => setCopyWidth(el.offsetWidth);
     measure();
-
     const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-    if (measureRef.current) {
-      ro.observe(measureRef.current);
-    }
+  useAnimationFrame((_, delta) => {
+    if (!copyWidth || reduceMotion) return;
 
-    window.addEventListener(
-      'resize',
-      measure,
-      { passive: true }
-    );
+    const b = boost.get();
+    // Scrolling flips the drift direction relative to the row's base direction.
+    if (b < -0.05) direction.current = reverse ? 1 : -1;
+    else if (b > 0.05) direction.current = reverse ? -1 : 1;
 
-    return () => {
-      ro.disconnect();
-
-      window.removeEventListener(
-        'resize',
-        measure
-      );
-    };
-  }, [children]);
-
-  useEffect(() => {
-    let lastY = window.scrollY;
-    let raf: number | null = null;
-
-    const onScroll = () => {
-      if (raf !== null) return;
-
-      raf = requestAnimationFrame(() => {
-        raf = null;
-
-        const currentY = window.scrollY;
-
-        rawScroll.set(
-          rawScroll.get() +
-            (currentY - lastY) *
-              sensitivity
-        );
-
-        lastY = currentY;
-      });
-    };
-
-    lastY = window.scrollY;
-
-    window.addEventListener(
-      'scroll',
-      onScroll,
-      { passive: true }
-    );
-
-    return () => {
-      window.removeEventListener(
-        'scroll',
-        onScroll
-      );
-
-      if (raf !== null) {
-        cancelAnimationFrame(raf);
-      }
-    };
-  }, [rawScroll, sensitivity]);
-
-  const x = useTransform(
-    smoothScroll,
-    (value) => {
-      if (!singleWidth) return 0;
-
-      const wrapped =
-        ((value % singleWidth) +
-          singleWidth) %
-        singleWidth;
-
-      return -singleWidth + wrapped;
-    }
-  );
+    const step =
+      direction.current * speed * (1 + Math.abs(b)) * (delta / 1000);
+    x.set(wrap(-copyWidth, 0, x.get() - step));
+  });
 
   return (
-    <div
-      className="
-        relative
-        w-full
-        overflow-hidden
-        [mask-image:linear-gradient(to_right,transparent,black_32px,black_calc(100%-32px),transparent)]
-      "
-    >
-      <motion.div
-        className={`flex w-max shrink-0 ${gapClassName}`}
-        style={{
-          x,
-          willChange: 'transform',
-        }}
-      >
-        <div
-          ref={measureRef}
-          className={`flex shrink-0 ${gapClassName}`}
-        >
+    <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_32px,black_calc(100%-32px),transparent)]">
+      <motion.div className="flex w-max" style={{ x, willChange: 'transform' }}>
+        {/* Spacing lives on the items (pr-2.5), so one copy's width is exact. */}
+        <div ref={copyRef} className="flex shrink-0">
           {children}
         </div>
-
-        <div
-          className={`flex shrink-0 ${gapClassName}`}
-          aria-hidden="true"
-        >
+        <div className="flex shrink-0" aria-hidden="true">
           {children}
         </div>
       </motion.div>
@@ -516,1607 +267,528 @@ function ScrollRow({
   );
 }
 
-/* ═══════════════════════════════════════════════
-   SKILL BADGE
-   FIXED TOOLTIP
-   ═══════════════════════════════════════════════ */
-
-function SkillBadge({
-  skill,
-  accent,
+function ExpertisePill({
+  label,
+  icon: Icon,
+  variant,
 }: {
-  skill: Skill;
-  accent: string;
+  label: string;
+  icon: LucideIcon;
+  variant: 'strong' | 'soft';
 }) {
-  const badgeRef =
-    useRef<HTMLDivElement>(null);
-
-  const tooltipRef =
-    useRef<HTMLDivElement>(null);
-
-  const [showTooltip, setShowTooltip] =
-    useState(false);
-
-  const [position, setPosition] =
-    useState({
-      left: 0,
-      top: 0,
-      arrowLeft: 50,
-    });
-
-  const updateTooltipPosition =
-    useCallback(() => {
-      const badge = badgeRef.current;
-
-      if (!badge) return;
-
-      const badgeRect =
-        badge.getBoundingClientRect();
-
-      const tooltipWidth =
-        Math.min(
-          240,
-          window.innerWidth - 32
-        );
-
-      const gap = 10;
-
-      /*
-       * Find the card that contains
-       * the hovered skill.
-       */
-      const card =
-        badge.closest(
-          '[data-skill-card]'
-        ) as HTMLElement | null;
-
-      const cardRect =
-        card?.getBoundingClientRect();
-
-      /*
-       * Center tooltip over badge.
-       */
-      let left =
-        badgeRect.left +
-        badgeRect.width / 2 -
-        tooltipWidth / 2;
-
-      /*
-       * Keep tooltip inside card.
-       */
-      const minLeft = cardRect
-        ? cardRect.left + 16
-        : 16;
-
-      const maxLeft = cardRect
-        ? cardRect.right -
-          tooltipWidth -
-          16
-        : window.innerWidth -
-          tooltipWidth -
-          16;
-
-      left = Math.max(
-        minLeft,
-        Math.min(
-          left,
-          Math.max(minLeft, maxLeft)
-        )
-      );
-
-      /*
-       * Arrow points to badge center.
-       */
-      const arrowLeft =
-        badgeRect.left +
-        badgeRect.width / 2 -
-        left;
-
-      /*
-       * Default position above badge.
-       */
-      let top =
-        badgeRect.top -
-        gap -
-        90;
-
-      /*
-       * If tooltip would go above
-       * the visible card, move below.
-       */
-      const tooltipHeight =
-        tooltipRef.current
-          ?.getBoundingClientRect()
-          .height || 90;
-
-      if (
-        top < 12 ||
-        (cardRect &&
-          top <
-            cardRect.top + 12)
-      ) {
-        top =
-          badgeRect.bottom + gap;
-      }
-
-      /*
-       * Keep tooltip vertically
-       * inside the card/viewport.
-       */
-      if (cardRect) {
-        const maxTop =
-          cardRect.bottom -
-          tooltipHeight -
-          12;
-
-        if (top > maxTop) {
-          top = Math.max(
-            cardRect.top + 12,
-            maxTop
-          );
-        }
-      } else {
-        const maxTop =
-          window.innerHeight -
-          tooltipHeight -
-          12;
-
-        top = Math.min(
-          top,
-          maxTop
-        );
-      }
-
-      setPosition({
-        left,
-        top,
-        arrowLeft: Math.max(
-          14,
-          Math.min(
-            arrowLeft,
-            tooltipWidth - 14
-          )
-        ),
-      });
-    }, []);
-
-  useEffect(() => {
-    if (!showTooltip) return;
-
-    const update = () => {
-      updateTooltipPosition();
-    };
-
-    update();
-
-    window.addEventListener(
-      'resize',
-      update,
-      { passive: true }
-    );
-
-    window.addEventListener(
-      'scroll',
-      update,
-      {
-        passive: true,
-        capture: true,
-      }
-    );
-
-    return () => {
-      window.removeEventListener(
-        'resize',
-        update
-      );
-
-      window.removeEventListener(
-        'scroll',
-        update,
-        true
-      );
-    };
-  }, [
-    showTooltip,
-    updateTooltipPosition,
-  ]);
-
+  const strong = variant === 'strong';
   return (
-    <div
-      ref={badgeRef}
-      className="relative"
-      onMouseEnter={() => {
-        setShowTooltip(true);
-
-        requestAnimationFrame(() => {
-          updateTooltipPosition();
-        });
-      }}
-      onMouseLeave={() => {
-        setShowTooltip(false);
-      }}
-      onFocus={() => {
-        setShowTooltip(true);
-
-        requestAnimationFrame(() => {
-          updateTooltipPosition();
-        });
-      }}
-      onBlur={() => {
-        setShowTooltip(false);
-      }}
-    >
-      {/* Skill badge */}
+    <div className="pr-2.5">
       <div
-        className="
-          px-3
-          py-[7px]
-          rounded-lg
-          border
-          border-white/[0.05]
-          bg-white/[0.015]
-          text-[12px]
-          text-slate-400
-          font-medium
-          cursor-default
-          select-none
-          whitespace-nowrap
-          transition-all
-          duration-200
-          ease-out
-          hover:bg-white/[0.04]
-          hover:text-slate-300
-          hover:border-white/[0.08]
-          hover:scale-[1.04]
-          hover:-translate-y-0.5
-        "
+        className={`flex select-none items-center gap-2 whitespace-nowrap rounded-xl border px-4 py-2.5 text-[13px] font-medium ${
+          strong
+            ? 'border-primary/[0.12] bg-primary/[0.04] text-slate-200'
+            : 'border-white/[0.06] bg-white/[0.015] text-slate-400'
+        }`}
       >
-        {skill.name}
+        <Icon
+          size={14}
+          className={strong ? 'text-primary-light opacity-70' : 'opacity-50'}
+        />
+        {label}
       </div>
-
-      {/* Tooltip */}
-      {showTooltip &&
-        typeof document !==
-          'undefined' &&
-        createPortal(
-          <div
-            ref={tooltipRef}
-            className="
-              fixed
-              z-[9999]
-              pointer-events-none
-              opacity-100
-              translate-y-0
-              scale-100
-              transition-all
-              duration-150
-              ease-out
-            "
-            style={{
-              left: `${position.left}px`,
-              top: `${position.top}px`,
-              width:
-                'min(240px, calc(100vw - 32px))',
-            }}
-          >
-            <div
-              className="
-                relative
-                w-full
-                rounded-lg
-                px-3.5
-                py-2.5
-                shadow-xl
-                shadow-black/30
-                bg-[rgba(11,15,23,0.94)]
-                backdrop-blur-xl
-                border
-                border-white/[0.08]
-              "
-            >
-              <p
-                className={`
-                  text-[11px]
-                  font-semibold
-                  ${accent}
-                  mb-1
-                `}
-              >
-                {skill.name}
-              </p>
-
-              <p
-                className="
-                  text-[11px]
-                  text-slate-400
-                  leading-relaxed
-                "
-              >
-                {skill.tip}
-              </p>
-
-              {/* Tooltip arrow */}
-              <div
-                className="
-                  absolute
-                  -bottom-1
-                  w-2
-                  h-2
-                  bg-[rgba(11,15,23,0.94)]
-                  border-r
-                  border-b
-                  border-white/[0.08]
-                  rotate-45
-                "
-                style={{
-                  left:
-                    `${position.arrowLeft}px`,
-                  transform:
-                    'translateX(-50%) rotate(45deg)',
-                }}
-              />
-            </div>
-          </div>,
-          document.body
-        )}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════
-   HEADER
-   ═══════════════════════════════════════════════ */
+/* -------------------------------------------------------------------------- */
+/*  Tooltip + badge                                                           */
+/* -------------------------------------------------------------------------- */
 
-function HeaderBlock({
-  inView,
-}: {
-  inView: boolean;
-}) {
+const TOOLTIP_W = 240;
+const TOOLTIP_GAP = 10;
+const VIEWPORT_PAD = 12;
+
+function SkillBadge({ skill, accent }: { skill: Skill; accent: string }) {
+  const badgeRef = useRef<HTMLButtonElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ left: 0, top: 0, arrow: 0, below: false });
+
+  const place = useCallback(() => {
+    const badge = badgeRef.current;
+    const tip = tipRef.current;
+    if (!badge || !tip) return;
+
+    const b = badge.getBoundingClientRect();
+    const width = Math.min(TOOLTIP_W, window.innerWidth - VIEWPORT_PAD * 2);
+    const height = tip.offsetHeight;
+
+    const center = b.left + b.width / 2;
+    const left = Math.max(
+      VIEWPORT_PAD,
+      Math.min(center - width / 2, window.innerWidth - width - VIEWPORT_PAD),
+    );
+
+    // Prefer above; flip below if it would leave the viewport.
+    const aboveTop = b.top - TOOLTIP_GAP - height;
+    const below = aboveTop < VIEWPORT_PAD;
+    const top = below ? b.bottom + TOOLTIP_GAP : aboveTop;
+
+    setPos({
+      left,
+      top,
+      below,
+      arrow: Math.max(14, Math.min(center - left, width - 14)),
+    });
+  }, []);
+
+  // Measure after the tooltip mounts, and keep it pinned on scroll/resize.
+  useLayoutEffect(() => {
+    if (!open) return;
+    place();
+    window.addEventListener('resize', place, { passive: true });
+    window.addEventListener('scroll', place, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open, place]);
+
+  // Close on outside tap / Escape (touch + keyboard support).
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!badgeRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   return (
     <>
-      <motion.div
-        initial={{
-          opacity: 0,
-          x: -70,
-        }}
-        animate={
-          inView
-            ? {
-                opacity: 1,
-                x: 0,
-              }
-            : {}
-        }
-        transition={{
-          duration: 0.7,
-          ease: [
-            0.22,
-            1,
-            0.36,
-            1,
-          ],
-        }}
-        className="mb-5"
+      <button
+        ref={badgeRef}
+        type="button"
+        aria-describedby={open ? `tip-${skill.name}` : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={() => setOpen((v) => !v)}
+        className="select-none whitespace-nowrap rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-[7px] text-[12px] font-medium text-slate-400 outline-none transition-[transform,background-color,border-color,color] duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.08] hover:bg-white/[0.04] hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-primary-light/60 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       >
-        <span
-          className="
-            inline-block
-            text-[11px]
-            font-mono
-            font-medium
-            tracking-[0.2em]
-            uppercase
-            text-slate-500
-            mb-3
-          "
-        >
-          // Skills
-        </span>
+        {skill.name}
+      </button>
 
-        <h2
-          className="
-            font-display
-            text-3xl
-            sm:text-4xl
-            lg:text-5xl
-            font-bold
-            text-white
-            tracking-tight
-          "
-        >
-          Skills & Technologies
-        </h2>
-      </motion.div>
-
-      <motion.p
-        initial={{
-          opacity: 0,
-          x: 70,
-        }}
-        animate={
-          inView
-            ? {
-                opacity: 1,
-                x: 0,
-              }
-            : {}
-        }
-        transition={{
-          duration: 0.7,
-          delay: 0.12,
-          ease: [
-            0.22,
-            1,
-            0.36,
-            1,
-          ],
-        }}
-        className="
-          text-slate-400
-          text-[15px]
-          max-w-2xl
-          mb-12
-          lg:mb-14
-        "
-      >
-        The tools and technologies I use
-        to build intelligent, scalable,
-        and practical digital solutions.
-      </motion.p>
+      {open &&
+        createPortal(
+          <motion.div
+            ref={tipRef}
+            id={`tip-${skill.name}`}
+            role="tooltip"
+            initial={{ opacity: 0, y: pos.below ? -6 : 6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.18, ease: EASE }}
+            className="pointer-events-none fixed z-[9999]"
+            style={{
+              left: pos.left,
+              top: pos.top,
+              width: `min(${TOOLTIP_W}px, calc(100vw - ${VIEWPORT_PAD * 2}px))`,
+              transformOrigin: pos.below ? 'top' : 'bottom',
+            }}
+          >
+            <div className="relative rounded-lg border border-white/[0.08] bg-[rgba(11,15,23,0.94)] px-3.5 py-2.5 shadow-xl shadow-black/30 backdrop-blur-xl">
+              <p className={`mb-1 text-[11px] font-semibold ${accent}`}>
+                {skill.name}
+              </p>
+              <p className="text-[11px] leading-relaxed text-slate-400">
+                {skill.tip}
+              </p>
+              <span
+                className={`absolute h-2 w-2 -translate-x-1/2 rotate-45 border-white/[0.08] bg-[rgba(11,15,23,0.94)] ${
+                  pos.below
+                    ? '-top-1 border-l border-t'
+                    : '-bottom-1 border-b border-r'
+                }`}
+                style={{ left: pos.arrow }}
+              />
+            </div>
+          </motion.div>,
+          document.body,
+        )}
     </>
   );
 }
 
-/* ═══════════════════════════════════════════════
-   CORE EXPERTISE LABEL
-   ═══════════════════════════════════════════════ */
+/* -------------------------------------------------------------------------- */
+/*  Category card (shared by desktop stage and mobile list)                   */
+/* -------------------------------------------------------------------------- */
 
-function CoreExpertiseLabel({
-  coreInView,
+function CategoryHeader({
+  category,
+  index,
+  size,
 }: {
-  coreInView: boolean;
+  category: Category;
+  index: number;
+  size: 'sm' | 'lg';
 }) {
+  const { title, icon: Icon, accent, accentBg, primary } = category;
+  const lg = size === 'lg';
+
   return (
-    <motion.p
-      initial={{
-        opacity: 0,
-        y: 20,
-      }}
-      animate={
-        coreInView
-          ? {
-              opacity: 1,
-              y: 0,
-            }
-          : {}
-      }
-      transition={{
-        duration: 0.6,
-        ease: [
-          0.22,
-          1,
-          0.36,
-          1,
-        ],
-      }}
-      className="
-        text-[11px]
-        font-mono
-        font-medium
-        tracking-[0.2em]
-        uppercase
-        text-slate-600
-        mb-5
-      "
-    >
-      // Core Expertise
-    </motion.p>
+    <div className={`flex items-start gap-3 ${lg ? 'mb-7 sm:gap-4' : 'mb-5'}`}>
+      <div
+        className={`flex shrink-0 items-center justify-center ${accentBg} ${
+          lg ? 'h-12 w-12 rounded-2xl sm:h-14 sm:w-14' : 'h-10 w-10 rounded-xl'
+        }`}
+      >
+        <Icon size={lg ? 24 : 20} className={accent} />
+      </div>
+
+      <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
+        <span className="shrink-0 pt-1 font-mono text-[11px] font-medium tracking-wider text-primary-light/50">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <h3
+          className={`font-display font-semibold leading-tight tracking-tight text-white ${
+            lg ? 'text-lg sm:text-xl lg:text-2xl' : 'text-base'
+          }`}
+        >
+          {title}
+        </h3>
+      </div>
+
+      {primary && (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary/[0.08] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-light">
+          <Sparkles size={9} />
+          Primary
+        </span>
+      )}
+    </div>
   );
 }
 
-/* ═══════════════════════════════════════════════
-   MAIN SKILLS SECTION
-   ═══════════════════════════════════════════════ */
+const cardVariants: Variants = {
+  enter: (dir: number) => ({ opacity: 0, y: dir * 48, scale: 0.96 }),
+  center: { opacity: 1, y: 0, scale: 1 },
+  exit: (dir: number) => ({ opacity: 0, y: dir * -48, scale: 0.97 }),
+};
 
-export default function Skills() {
-  const sectionRef =
-    useRef<HTMLDivElement>(null);
+const chipVariants: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.12 + i * 0.015, duration: 0.25, ease: EASE },
+  }),
+};
 
-  const coreRef =
-    useRef<HTMLDivElement>(null);
-
-  const inView = useInView(
-    sectionRef,
-    {
-      once: true,
-      margin: '-60px',
-    }
-  );
-
-  const coreInView = useInView(
-    coreRef,
-    {
-      once: true,
-      margin: '-40px',
-    }
-  );
+function StageCard({
+  category,
+  index,
+  direction,
+  reduceMotion,
+}: {
+  category: Category;
+  index: number;
+  direction: number;
+  reduceMotion: boolean;
+}) {
+  const { accent, accentBorder, primary, skills } = category;
 
   return (
-    <section
-      id="skills"
-      ref={sectionRef}
-      className="
-        relative
-        py-24
-        lg:py-32
-      "
+    <motion.div
+      custom={direction}
+      variants={reduceMotion ? undefined : cardVariants}
+      initial={reduceMotion ? { opacity: 0 } : 'enter'}
+      animate={reduceMotion ? { opacity: 1 } : 'center'}
+      exit={reduceMotion ? { opacity: 0 } : 'exit'}
+      transition={{
+        opacity: { duration: 0.3, ease: 'easeOut' },
+        default: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+      }}
+      className={`pointer-events-auto absolute max-h-[calc(100dvh-140px)] w-full max-w-2xl overflow-y-auto rounded-3xl border bg-white/[0.025] p-6 shadow-2xl shadow-black/25 backdrop-blur-xl sm:p-8 lg:p-10 ${
+        primary ? accentBorder : 'border-white/[0.06]'
+      }`}
     >
-      {/* Ambient background */}
+      <CategoryHeader category={category} index={index} size="lg" />
+
+      <ul className="flex flex-wrap gap-1.5 sm:gap-2">
+        {skills.map((skill, i) => (
+          <motion.li
+            key={skill.name}
+            custom={i}
+            variants={chipVariants}
+            initial={reduceMotion ? false : 'hidden'}
+            animate="show"
+          >
+            <SkillBadge skill={skill} accent={accent} />
+          </motion.li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Desktop: sticky scroll stage (no wheel hijacking, no portals)             */
+/* -------------------------------------------------------------------------- */
+
+function DesktopStage() {
+  const reduceMotion = !!useReducedMotion();
+  const stageRef = useRef<HTMLDivElement>(null);
+  const total = categories.length;
+
+  const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const prevIndex = useRef(0);
+
+  const [locked, setLocked] = useState(false);
+
+  const { scrollY } = useScroll();
+  const { scrollYProgress } = useScroll({
+    target: stageRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // The stage is "locked" while its tall spacer fills the viewport.
+  const checkLock = useCallback(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setLocked(r.top <= 0 && r.bottom >= window.innerHeight);
+  }, []);
+
+  useMotionValueEvent(scrollY, 'change', checkLock);
+  useEffect(() => {
+    checkLock();
+    window.addEventListener('resize', checkLock, { passive: true });
+    return () => window.removeEventListener('resize', checkLock);
+  }, [checkLock]);
+
+  useMotionValueEvent(scrollYProgress, 'change', (p) => {
+    const next = Math.min(total - 1, Math.max(0, Math.floor(p * total)));
+    if (next === prevIndex.current) return;
+    setDirection(next > prevIndex.current ? 1 : -1);
+    prevIndex.current = next;
+    setActive(next);
+  });
+
+  // Dots (and keyboard users) jump by scrolling to the matching slice.
+  const jumpTo = (index: number) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const top = stage.getBoundingClientRect().top + window.scrollY;
+    const range = stage.offsetHeight - window.innerHeight;
+    window.scrollTo({
+      top: top + (index / total) * range + 2,
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    });
+  };
+
+  const progressScale = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    mass: 0.4,
+  });
+
+  return (
+    <>
+      {/* Empty spacer: its height is the scroll distance of the whole stage. */}
       <div
-        className="
-          absolute
-          inset-0
-          bg-gradient-to-b
-          from-dark
-          via-surface/20
-          to-dark
-          pointer-events-none
-        "
+        ref={stageRef}
+        aria-hidden="true"
+        style={{ height: `${total * 100}vh` }}
       />
 
-      <div
-        className="
-          absolute
-          top-1/3
-          -right-64
-          w-[400px]
-          h-[400px]
-          rounded-full
-          bg-primary/[0.012]
-          blur-[120px]
-          pointer-events-none
-        "
-      />
+      {/* Fixed layer in <body>: pins to the screen no matter which ancestor
+          has overflow / transform set (which breaks position: sticky). */}
+      {createPortal(
+        <AnimatePresence>
+          {locked && (
+            <motion.div
+              key="skills-stage"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="pointer-events-none fixed inset-0 z-40 flex h-screen w-screen items-center justify-center overflow-hidden px-6 lg:px-8"
+            >
+              <div className="relative flex h-full w-full max-w-2xl items-center justify-center pb-20 pt-16">
+                <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                  <StageCard
+                    key={categories[active].id}
+                    category={categories[active]}
+                    index={active}
+                    direction={direction}
+                    reduceMotion={reduceMotion}
+                  />
+                </AnimatePresence>
+              </div>
 
-      {/* Header + Core */}
-      <div
-        className="
-          max-w-7xl
-          mx-auto
-          px-5
-          sm:px-6
-          lg:px-8
-          relative
-        "
-      >
-        <HeaderBlock
-          inView={inView}
-        />
+              <div
+                aria-live="polite"
+                className="absolute right-6 top-7 font-mono text-[11px] text-slate-500 lg:right-8"
+              >
+                <span className="text-slate-300">
+                  {String(active + 1).padStart(2, '0')}
+                </span>
+                {' / '}
+                {String(total).padStart(2, '0')}
+              </div>
 
-        <div
-          ref={coreRef}
-          className="
-            mb-14
-            lg:mb-16
-          "
-        >
-          <CoreExpertiseLabel
-            coreInView={coreInView}
-          />
+              <nav
+                aria-label="Skill categories"
+                className="pointer-events-auto absolute bottom-7 left-1/2 flex -translate-x-1/2 items-center gap-2"
+              >
+                {categories.map((c, i) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    aria-label={c.title}
+                    aria-current={i === active}
+                    onClick={() => jumpTo(i)}
+                    className="group flex h-4 items-center outline-none"
+                  >
+                    <motion.span
+                      animate={{
+                        width: i === active ? 32 : 6,
+                        opacity: i === active ? 1 : 0.35,
+                      }}
+                      transition={{ duration: 0.35, ease: EASE }}
+                      className="block h-1.5 rounded-full bg-primary-light group-hover:opacity-80 group-focus-visible:ring-2 group-focus-visible:ring-primary-light/60"
+                    />
+                  </button>
+                ))}
+              </nav>
+
+              <motion.div
+                style={{ scaleX: progressScale }}
+                className="absolute inset-x-0 bottom-0 h-px origin-left bg-primary-light/40"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Mobile: stacked cards                                                     */
+/* -------------------------------------------------------------------------- */
+
+function MobileCard({ category, index }: { category: Category; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const reduceMotion = useReducedMotion();
+  const { accent, accentBorder, primary, skills } = category;
+
+  return (
+    <motion.li
+      ref={ref}
+      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+      animate={inView ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.5, ease: EASE }}
+      className={`rounded-2xl border bg-white/[0.025] p-5 shadow-xl shadow-black/20 backdrop-blur-xl ${
+        primary ? accentBorder : 'border-white/[0.06]'
+      }`}
+    >
+      <CategoryHeader category={category} index={index} size="sm" />
+      <ul className="flex flex-wrap gap-1.5">
+        {skills.map((skill) => (
+          <li key={skill.name}>
+            <SkillBadge skill={skill} accent={accent} />
+          </li>
+        ))}
+      </ul>
+    </motion.li>
+  );
+}
+
+function MobileList() {
+  return (
+    <ul className="mt-4 flex flex-col gap-5 px-5 sm:px-6">
+      {categories.map((c, i) => (
+        <MobileCard key={c.id} category={c} index={i} />
+      ))}
+    </ul>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Section                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export default function Skills() {
+  const reduceMotion = useReducedMotion();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const coreRef = useRef<HTMLDivElement>(null);
+  const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
+  const coreInView = useInView(coreRef, { once: true, margin: '-40px' });
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
+  const reveal = (inView: boolean, from: { x?: number; y?: number }, delay = 0) => ({
+    initial: reduceMotion ? false : { opacity: 0, ...from },
+    animate: inView ? { opacity: 1, x: 0, y: 0 } : undefined,
+    transition: { duration: 0.7, delay, ease: EASE },
+  });
+
+  return (
+    <section id="skills" className="relative py-24 lg:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-dark via-surface/20 to-dark" />
+      <div className="pointer-events-none absolute -right-64 top-1/3 h-[400px] w-[400px] rounded-full bg-primary/[0.012] blur-[120px]" />
+
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div ref={headerRef}>
+          <motion.div {...reveal(headerInView, { x: -60 })} className="mb-5">
+            <span className="mb-3 inline-block font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
+              {'// Skills'}
+            </span>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Skills &amp; Technologies
+            </h2>
+          </motion.div>
+
+          <motion.p
+            {...reveal(headerInView, { x: 60 }, 0.12)}
+            className="mb-12 max-w-2xl text-[15px] text-slate-400 lg:mb-14"
+          >
+            The tools and technologies I use to build intelligent, scalable, and
+            practical digital solutions.
+          </motion.p>
+        </div>
+
+        <div ref={coreRef} className="mb-14 lg:mb-16">
+          <motion.p
+            {...reveal(coreInView, { y: 20 })}
+            className="mb-5 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-600"
+          >
+            {'// Core Expertise'}
+          </motion.p>
 
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 35,
-            }}
-            animate={
-              coreInView
-                ? {
-                    opacity: 1,
-                    y: 0,
-                  }
-                : {}
-            }
-            transition={{
-              duration: 0.7,
-              delay: 0.1,
-              ease: [
-                0.22,
-                1,
-                0.36,
-                1,
-              ],
-            }}
-            className="
-              flex
-              flex-col
-              gap-3
-              -mx-5
-              sm:-mx-6
-              lg:-mx-8
-              px-5
-              sm:px-6
-              lg:px-8
-            "
+            {...reveal(coreInView, { y: 30 }, 0.1)}
+            className="-mx-5 flex flex-col gap-3 sm:-mx-6 lg:-mx-8"
           >
-            <ScrollRow
-              sensitivity={0.6}
-            >
-              {coreExpertise.map(
-                ({
-                  label,
-                  icon: Icon,
-                }) => (
-                  <div
-                    key={label}
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      px-4
-                      py-2.5
-                      rounded-xl
-                      border
-                      border-primary/[0.12]
-                      bg-primary/[0.04]
-                      text-[13px]
-                      font-medium
-                      text-slate-200
-                      select-none
-                      whitespace-nowrap
-                    "
-                  >
-                    <Icon
-                      size={14}
-                      className="
-                        text-primary-light
-                        opacity-70
-                      "
-                    />
-
-                    {label}
-                  </div>
-                )
-              )}
-            </ScrollRow>
-
-            <ScrollRow
-              sensitivity={-0.6}
-            >
-              {[
-                ...coreExpertise,
-              ]
-                .reverse()
-                .map(
-                  ({
-                    label,
-                    icon: Icon,
-                  }) => (
-                    <div
-                      key={label}
-                      className="
-                        flex
-                        items-center
-                        gap-2
-                        px-4
-                        py-2.5
-                        rounded-xl
-                        border
-                        border-white/[0.06]
-                        bg-white/[0.015]
-                        text-[13px]
-                        font-medium
-                        text-slate-400
-                        select-none
-                        whitespace-nowrap
-                      "
-                    >
-                      <Icon
-                        size={14}
-                        className="opacity-50"
-                      />
-
-                      {label}
-                    </div>
-                  )
-                )}
-            </ScrollRow>
+            <Marquee speed={28}>
+              {coreExpertise.map((item) => (
+                <ExpertisePill key={item.label} {...item} variant="strong" />
+              ))}
+            </Marquee>
+            <Marquee speed={22} reverse>
+              {[...coreExpertise].reverse().map((item) => (
+                <ExpertisePill key={item.label} {...item} variant="soft" />
+              ))}
+            </Marquee>
           </motion.div>
         </div>
       </div>
 
-      {/* Category scroll stage */}
-      <CategoryScrollStage
-        categories={categories}
-      />
+      {isDesktop ? <DesktopStage /> : <MobileList />}
     </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   CATEGORY SCROLL STAGE
-   ═══════════════════════════════════════════════ */
-
-function CategoryScrollStage({
-  categories,
-}: {
-  categories: Category[];
-}) {
-  const stageRef =
-    useRef<HTMLDivElement>(null);
-
-  const total =
-    categories.length;
-
-  const vh =
-    useViewportHeight();
-
-  const [
-    activeIndex,
-    setActiveIndex,
-  ] = useState(0);
-
-  const [
-    direction,
-    setDirection,
-  ] = useState(1);
-
-  const [
-    isActive,
-    setIsActive,
-  ] = useState(false);
-
-  const [
-    mounted,
-    setMounted,
-  ] = useState(false);
-
-  const [
-    isMobile,
-    setIsMobile,
-  ] = useState(false);
-
-  const lastIndex =
-    useRef(0);
-
-  const lastProgress =
-    useRef(0);
-
-  const frameRef =
-    useRef<number | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-
-    const checkMobile = () => {
-      setIsMobile(
-        window.innerWidth < 768
-      );
-    };
-
-    checkMobile();
-
-    window.addEventListener(
-      'resize',
-      checkMobile,
-      { passive: true }
-    );
-
-    return () => {
-      window.removeEventListener(
-        'resize',
-        checkMobile
-      );
-
-      if (
-        frameRef.current !== null
-      ) {
-        cancelAnimationFrame(
-          frameRef.current
-        );
-      }
-    };
-  }, []);
-
-  const update =
-    useCallback(() => {
-      frameRef.current = null;
-
-      const stage =
-        stageRef.current;
-
-      if (!stage) return;
-
-      const rect =
-        stage.getBoundingClientRect();
-
-      const scrollDistance =
-        Math.max(
-          1,
-          rect.height - vh
-        );
-
-      const rawProgress =
-        -rect.top /
-        scrollDistance;
-
-      const progress =
-        Math.max(
-          0,
-          Math.min(
-            1,
-            rawProgress
-          )
-        );
-
-      const currentlyActive =
-        rect.top <= 0 &&
-        rect.bottom >= vh;
-
-      setIsActive(
-        (prev) =>
-          prev === currentlyActive
-            ? prev
-            : currentlyActive
-      );
-
-      if (
-        progress >
-        lastProgress.current +
-          0.001
-      ) {
-        setDirection(1);
-      } else if (
-        progress <
-        lastProgress.current -
-          0.001
-      ) {
-        setDirection(-1);
-      }
-
-      lastProgress.current =
-        progress;
-
-      const calculatedIndex =
-        Math.min(
-          total - 1,
-          Math.floor(
-            progress * total
-          )
-        );
-
-      if (
-        calculatedIndex !==
-        lastIndex.current
-      ) {
-        lastIndex.current =
-          calculatedIndex;
-
-        setActiveIndex(
-          calculatedIndex
-        );
-      }
-    }, [total, vh]);
-
-  useEffect(() => {
-    const requestUpdate =
-      () => {
-        if (
-          frameRef.current === null
-        ) {
-          frameRef.current =
-            requestAnimationFrame(
-              update
-            );
-        }
-      };
-
-    update();
-
-    window.addEventListener(
-      'scroll',
-      requestUpdate,
-      { passive: true }
-    );
-
-    window.addEventListener(
-      'resize',
-      requestUpdate,
-      { passive: true }
-    );
-
-    return () => {
-      window.removeEventListener(
-        'scroll',
-        requestUpdate
-      );
-
-      window.removeEventListener(
-        'resize',
-        requestUpdate
-      );
-
-      if (
-        frameRef.current !== null
-      ) {
-        cancelAnimationFrame(
-          frameRef.current
-        );
-      }
-    };
-  }, [update]);
-
-  /* ═════════════════════════════════════════════
-     MOBILE
-     ═════════════════════════════════════════════ */
-
-  if (
-    mounted &&
-    isMobile
-  ) {
-    return (
-      <div
-        className="
-          px-5
-          sm:px-6
-          flex
-          flex-col
-          gap-5
-          mt-4
-        "
-      >
-        {categories.map(
-          (category, i) => (
-            <MobileCard
-              key={category.step}
-              category={category}
-              index={i}
-            />
-          )
-        )}
-      </div>
-    );
-  }
-
-  /* ═════════════════════════════════════════════
-     DESKTOP
-     ═════════════════════════════════════════════ */
-
-  return (
-    <>
-      <div
-        ref={stageRef}
-        className="
-          relative
-          w-full
-        "
-        style={{
-          height:
-            `${total * 100}vh`,
-        }}
-      />
-
-      {mounted &&
-        isActive &&
-        createPortal(
-          <FixedCategoryDisplay
-            categories={categories}
-            activeIndex={activeIndex}
-            direction={direction}
-          />,
-          document.body
-        )}
-    </>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   MOBILE CARD
-   ═══════════════════════════════════════════════ */
-
-function MobileCard({
-  category,
-  index,
-}: {
-  category: Category;
-  index: number;
-}) {
-  const ref =
-    useRef<HTMLDivElement>(null);
-
-  const inView = useInView(
-    ref,
-    {
-      once: true,
-      margin: '-40px',
-    }
-  );
-
-  const {
-    step,
-    title,
-    icon: Icon,
-    accent,
-    accentBg,
-    accentBorder,
-    primary,
-    skills,
-  } = category;
-
-  return (
-    <motion.div
-      ref={ref}
-      data-skill-card
-      initial={{
-        opacity: 0,
-        y: 32,
-      }}
-      animate={
-        inView
-          ? {
-              opacity: 1,
-              y: 0,
-            }
-          : {}
-      }
-      transition={{
-        duration: 0.55,
-        delay: index * 0.05,
-        ease: [
-          0.22,
-          1,
-          0.36,
-          1,
-        ],
-      }}
-      className={`
-        relative
-        rounded-2xl
-        bg-white/[0.025]
-        backdrop-blur-xl
-        shadow-xl
-        shadow-black/20
-        p-5
-        border
-        ${
-          primary
-            ? accentBorder
-            : 'border-white/[0.06]'
-        }
-      `}
-    >
-      {/* Header */}
-      <div
-        className="
-          flex
-          items-start
-          gap-3
-          mb-5
-        "
-      >
-        <div
-          className={`
-            w-10
-            h-10
-            rounded-xl
-            ${accentBg}
-            flex
-            items-center
-            justify-center
-            shrink-0
-          `}
-        >
-          <Icon
-            size={20}
-            className={accent}
-          />
-        </div>
-
-        <div
-          className="
-            flex-1
-            min-w-0
-          "
-        >
-          <div
-            className="
-              flex
-              items-start
-              gap-2
-            "
-          >
-            <span
-              className="
-                text-[11px]
-                font-mono
-                text-primary-light/50
-                font-medium
-                tracking-wider
-                shrink-0
-                pt-0.5
-              "
-            >
-              {step}
-            </span>
-
-            <h3
-              className="
-                font-display
-                text-base
-                font-semibold
-                text-white
-                tracking-tight
-                leading-tight
-              "
-            >
-              {title}
-            </h3>
-          </div>
-        </div>
-
-        {primary && (
-          <span
-            className="
-              inline-flex
-              items-center
-              gap-1
-              px-2
-              py-0.5
-              rounded-md
-              bg-primary/[0.08]
-              text-[10px]
-              font-semibold
-              text-primary-light
-              tracking-wider
-              uppercase
-              shrink-0
-            "
-          >
-            <Sparkles size={9} />
-            Primary
-          </span>
-        )}
-      </div>
-
-      {/* Skills */}
-      <div
-        className="
-          flex
-          flex-wrap
-          gap-1.5
-        "
-      >
-        {skills.map(
-          (skill) => (
-            <SkillBadge
-              key={skill.name}
-              skill={skill}
-              accent={accent}
-            />
-          )
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   FIXED CATEGORY DISPLAY
-   ═══════════════════════════════════════════════ */
-
-function FixedCategoryDisplay({
-  categories,
-  activeIndex,
-  direction,
-}: {
-  categories: Category[];
-  activeIndex: number;
-  direction: number;
-}) {
-  const category =
-    categories[activeIndex];
-
-  return (
-    <div
-      className="
-        fixed
-        inset-0
-        z-[40]
-        w-screen
-        h-screen
-        overflow-hidden
-        pointer-events-none
-      "
-    >
-      {/* Background */}
-      <div
-        className="
-          absolute
-          inset-0
-          bg-dark/[0.03]
-          pointer-events-none
-        "
-      />
-
-      {/* Card area */}
-      <div
-        className="
-          absolute
-          inset-0
-          flex
-          items-center
-          justify-center
-          px-5
-          sm:px-6
-          lg:px-8
-          pt-16
-          pb-20
-        "
-      >
-        <AnimatePresence
-          initial={false}
-          mode="sync"
-        >
-          <LockedCategoryCard
-            key={category.step}
-            category={category}
-            direction={direction}
-          />
-        </AnimatePresence>
-      </div>
-
-      {/* Counter */}
-      <motion.div
-        key={`counter-${activeIndex}`}
-        initial={{
-          opacity: 0,
-          y: -8,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: 'easeOut',
-        }}
-        className="
-          absolute
-          top-7
-          right-5
-          sm:right-6
-          lg:right-8
-          font-mono
-          text-[11px]
-          text-slate-500
-          z-50
-        "
-      >
-        <span
-          className="
-            text-slate-300
-          "
-        >
-          {String(
-            activeIndex + 1
-          ).padStart(2, '0')}
-        </span>
-
-        {' / '}
-
-        {String(
-          categories.length
-        ).padStart(2, '0')}
-      </motion.div>
-
-      {/* Progress dots */}
-      <div
-        className="
-          absolute
-          bottom-7
-          left-1/2
-          -translate-x-1/2
-          flex
-          items-center
-          gap-2
-          z-50
-        "
-      >
-        {categories.map(
-          (item, index) => (
-            <motion.div
-              key={item.step}
-              animate={{
-                width:
-                  index === activeIndex
-                    ? 32
-                    : 6,
-                opacity:
-                  index === activeIndex
-                    ? 1
-                    : 0.35,
-              }}
-              transition={{
-                duration: 0.35,
-                ease: [
-                  0.22,
-                  1,
-                  0.36,
-                  1,
-                ],
-              }}
-              className="
-                h-1.5
-                rounded-full
-                bg-primary-light
-              "
-            />
-          )
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   LOCKED CATEGORY CARD
-   ═══════════════════════════════════════════════ */
-
-function LockedCategoryCard({
-  category,
-  direction,
-}: {
-  category: Category;
-  direction: number;
-}) {
-  const {
-    step,
-    title,
-    icon: Icon,
-    accent,
-    accentBg,
-    accentBorder,
-    primary,
-    skills,
-  } = category;
-
-  const enterY =
-    direction > 0
-      ? 48
-      : -48;
-
-  const exitY =
-    direction > 0
-      ? -48
-      : 48;
-
-  return (
-    <motion.div
-      data-skill-card
-      initial={{
-        opacity: 0,
-        y: enterY,
-        scale: 0.96,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        scale: 1,
-      }}
-      exit={{
-        opacity: 0,
-        y: exitY,
-        scale: 0.97,
-      }}
-      transition={{
-        opacity: {
-          duration: 0.35,
-          ease: 'easeOut',
-        },
-        y: {
-          duration: 0.55,
-          ease: [
-            0.16,
-            1,
-            0.3,
-            1,
-          ],
-        },
-        scale: {
-          duration: 0.55,
-          ease: [
-            0.16,
-            1,
-            0.3,
-            1,
-          ],
-        },
-      }}
-      className="
-        relative
-        w-full
-        max-w-2xl
-        rounded-3xl
-        bg-white/[0.025]
-        backdrop-blur-xl
-        shadow-2xl
-        shadow-black/25
-        p-6
-        sm:p-8
-        lg:p-10
-        pointer-events-auto
-        max-h-[calc(100dvh-120px)]
-        overflow-y-auto
-        scrollbar-thin
-        scrollbar-track-transparent
-        scrollbar-thumb-white/10
-      "
-    >
-      {/* Border */}
-      <div
-        className={`
-          absolute
-          inset-0
-          rounded-3xl
-          pointer-events-none
-          ${
-            primary
-              ? `border ${accentBorder}`
-              : 'border border-white/[0.06]'
-          }
-        `}
-      />
-
-      {/* Header */}
-      <div
-        className="
-          relative
-          flex
-          items-start
-          gap-3
-          sm:gap-4
-          mb-6
-          sm:mb-7
-        "
-      >
-        {/* Icon */}
-        <div
-          className={`
-            w-11
-            h-11
-            sm:w-14
-            sm:h-14
-            rounded-2xl
-            ${accentBg}
-            flex
-            items-center
-            justify-center
-            shrink-0
-          `}
-        >
-          <Icon
-            size={24}
-            className={accent}
-          />
-        </div>
-
-        {/* Title */}
-        <div
-          className="
-            flex-1
-            min-w-0
-          "
-        >
-          <div
-            className="
-              flex
-              items-start
-              gap-2
-              sm:gap-3
-            "
-          >
-            <span
-              className="
-                text-[11px]
-                sm:text-[12px]
-                font-mono
-                text-primary-light/50
-                font-medium
-                tracking-wider
-                shrink-0
-                pt-1
-              "
-            >
-              {step}
-            </span>
-
-            <h3
-              className="
-                font-display
-                text-lg
-                sm:text-xl
-                lg:text-2xl
-                font-semibold
-                text-white
-                tracking-tight
-                leading-tight
-              "
-            >
-              {title}
-            </h3>
-          </div>
-        </div>
-
-        {/* Primary badge */}
-        {primary && (
-          <span
-            className="
-              hidden
-              sm:inline-flex
-              items-center
-              gap-1
-              px-2.5
-              py-1
-              rounded-md
-              bg-primary/[0.08]
-              text-[10px]
-              font-semibold
-              text-primary-light
-              tracking-wider
-              uppercase
-              shrink-0
-            "
-          >
-            <Sparkles size={9} />
-            Primary
-          </span>
-        )}
-      </div>
-
-      {/* Skills */}
-      <div
-        className="
-          relative
-          flex
-          flex-wrap
-          gap-1.5
-          sm:gap-2
-        "
-      >
-        {skills.map(
-          (skill, index) => (
-            <motion.div
-              key={skill.name}
-              initial={{
-                opacity: 0,
-                y: 6,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay:
-                  0.1 +
-                  index *
-                    0.015,
-                duration: 0.25,
-                ease: [
-                  0.22,
-                  1,
-                  0.36,
-                  1,
-                ],
-              }}
-            >
-              <SkillBadge
-                skill={skill}
-                accent={accent}
-              />
-            </motion.div>
-          )
-        )}
-      </div>
-    </motion.div>
   );
 }
