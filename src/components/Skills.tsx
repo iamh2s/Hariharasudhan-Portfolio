@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -33,10 +34,6 @@ import {
   Wrench,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-
-/* -------------------------------------------------------------------------- */
-/*  Data                                                                      */
-/* -------------------------------------------------------------------------- */
 
 interface Skill {
   name: string;
@@ -181,93 +178,121 @@ const categories: Category[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  Hooks                                                                     */
+/* Responsive hook                                                            */
 /* -------------------------------------------------------------------------- */
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
-    const mql = window.matchMedia(query);
-    const onChange = () => setMatches(mql.matches);
-    onChange();
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
+    const media = window.matchMedia(query);
+    const update = () => setMatches(media.matches);
+
+    update();
+    media.addEventListener('change', update);
+
+    return () => media.removeEventListener('change', update);
   }, [query]);
 
   return matches;
 }
 
-const wrap = (min: number, max: number, v: number) => {
+const wrap = (min: number, max: number, value: number) => {
   const range = max - min;
-  return ((((v - min) % range) + range) % range) + min;
+  return ((((value - min) % range) + range) % range) + min;
 };
 
 /* -------------------------------------------------------------------------- */
-/*  Marquee: drifts on its own, speeds up and follows the scroll direction    */
+/* Marquee                                                                     */
 /* -------------------------------------------------------------------------- */
 
-function Marquee({
+const Marquee = memo(function Marquee({
   children,
   speed = 28,
   reverse = false,
 }: {
   children: ReactNode;
-  speed?: number; // px per second
+  speed?: number;
   reverse?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const copyRef = useRef<HTMLDivElement>(null);
   const [copyWidth, setCopyWidth] = useState(0);
+
   const x = useMotionValue(0);
   const direction = useRef(reverse ? -1 : 1);
 
   const { scrollY } = useScroll();
   const velocity = useVelocity(scrollY);
-  const smoothVelocity = useSpring(velocity, { damping: 50, stiffness: 400 });
-  const boost = useTransform(smoothVelocity, [-1500, 0, 1500], [-4, 0, 4], {
-    clamp: false,
+
+  const smoothVelocity = useSpring(velocity, {
+    damping: 60,
+    stiffness: 250,
   });
 
+  const boost = useTransform(
+    smoothVelocity,
+    [-1500, 0, 1500],
+    [-2, 0, 2],
+    { clamp: false },
+  );
+
   useLayoutEffect(() => {
-    const el = copyRef.current;
-    if (!el) return;
-    const measure = () => setCopyWidth(el.offsetWidth);
+    const element = copyRef.current;
+    if (!element) return;
+
+    const measure = () => {
+      setCopyWidth(element.offsetWidth);
+    };
+
     measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+
+    return () => observer.disconnect();
   }, []);
 
   useAnimationFrame((_, delta) => {
     if (!copyWidth || reduceMotion) return;
 
-    const b = boost.get();
-    // Scrolling flips the drift direction relative to the row's base direction.
-    if (b < -0.05) direction.current = reverse ? 1 : -1;
-    else if (b > 0.05) direction.current = reverse ? -1 : 1;
+    const boostValue = boost.get();
 
-    const step =
-      direction.current * speed * (1 + Math.abs(b)) * (delta / 1000);
-    x.set(wrap(-copyWidth, 0, x.get() - step));
+    if (boostValue < -0.05) {
+      direction.current = reverse ? 1 : -1;
+    } else if (boostValue > 0.05) {
+      direction.current = reverse ? -1 : 1;
+    }
+
+    const deltaSeconds = Math.min(delta, 40) / 1000;
+    const movement =
+      direction.current *
+      speed *
+      (1 + Math.abs(boostValue)) *
+      deltaSeconds;
+
+    x.set(wrap(-copyWidth, 0, x.get() - movement));
   });
 
   return (
     <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_32px,black_calc(100%-32px),transparent)]">
-      <motion.div className="flex w-max" style={{ x, willChange: 'transform' }}>
-        {/* Spacing lives on the items (pr-2.5), so one copy's width is exact. */}
+      <motion.div
+        className="flex w-max"
+        style={{ x, willChange: 'transform' }}
+      >
         <div ref={copyRef} className="flex shrink-0">
           {children}
         </div>
+
         <div className="flex shrink-0" aria-hidden="true">
           {children}
         </div>
       </motion.div>
     </div>
   );
-}
+});
 
-function ExpertisePill({
+const ExpertisePill = memo(function ExpertisePill({
   label,
   icon: Icon,
   variant,
@@ -277,6 +302,7 @@ function ExpertisePill({
   variant: 'strong' | 'soft';
 }) {
   const strong = variant === 'strong';
+
   return (
     <div className="pr-2.5">
       <div
@@ -288,80 +314,120 @@ function ExpertisePill({
       >
         <Icon
           size={14}
-          className={strong ? 'text-primary-light opacity-70' : 'opacity-50'}
+          className={
+            strong ? 'text-primary-light opacity-70' : 'opacity-50'
+          }
         />
         {label}
       </div>
     </div>
   );
-}
+});
 
 /* -------------------------------------------------------------------------- */
-/*  Tooltip + badge                                                           */
+/* Tooltip and skill badge                                                     */
 /* -------------------------------------------------------------------------- */
 
 const TOOLTIP_W = 240;
 const TOOLTIP_GAP = 10;
 const VIEWPORT_PAD = 12;
 
-function SkillBadge({ skill, accent }: { skill: Skill; accent: string }) {
+const SkillBadge = memo(function SkillBadge({
+  skill,
+  accent,
+}: {
+  skill: Skill;
+  accent: string;
+}) {
   const badgeRef = useRef<HTMLButtonElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
+
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ left: 0, top: 0, arrow: 0, below: false });
+  const [pos, setPos] = useState({
+    left: 0,
+    top: 0,
+    arrow: 0,
+    below: false,
+  });
 
   const place = useCallback(() => {
     const badge = badgeRef.current;
     const tip = tipRef.current;
+
     if (!badge || !tip) return;
 
-    const b = badge.getBoundingClientRect();
-    const width = Math.min(TOOLTIP_W, window.innerWidth - VIEWPORT_PAD * 2);
+    const rect = badge.getBoundingClientRect();
+    const width = Math.min(
+      TOOLTIP_W,
+      window.innerWidth - VIEWPORT_PAD * 2,
+    );
     const height = tip.offsetHeight;
 
-    const center = b.left + b.width / 2;
+    const center = rect.left + rect.width / 2;
+
     const left = Math.max(
       VIEWPORT_PAD,
-      Math.min(center - width / 2, window.innerWidth - width - VIEWPORT_PAD),
+      Math.min(
+        center - width / 2,
+        window.innerWidth - width - VIEWPORT_PAD,
+      ),
     );
 
-    // Prefer above; flip below if it would leave the viewport.
-    const aboveTop = b.top - TOOLTIP_GAP - height;
+    const aboveTop = rect.top - TOOLTIP_GAP - height;
     const below = aboveTop < VIEWPORT_PAD;
-    const top = below ? b.bottom + TOOLTIP_GAP : aboveTop;
+    const top = below
+      ? Math.min(
+          rect.bottom + TOOLTIP_GAP,
+          window.innerHeight - height - VIEWPORT_PAD,
+        )
+      : aboveTop;
 
     setPos({
       left,
-      top,
+      top: Math.max(VIEWPORT_PAD, top),
       below,
       arrow: Math.max(14, Math.min(center - left, width - 14)),
     });
   }, []);
 
-  // Measure after the tooltip mounts, and keep it pinned on scroll/resize.
   useLayoutEffect(() => {
     if (!open) return;
+
     place();
+
+    const handleScroll = () => setOpen(false);
+
     window.addEventListener('resize', place, { passive: true });
-    window.addEventListener('scroll', place, { passive: true, capture: true });
+    window.addEventListener('scroll', handleScroll, {
+      passive: true,
+      capture: true,
+    });
+
     return () => {
       window.removeEventListener('resize', place);
-      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [open, place]);
 
-  // Close on outside tap / Escape (touch + keyboard support).
   useEffect(() => {
     if (!open) return;
-    const onPointer = (e: PointerEvent) => {
-      if (!badgeRef.current?.contains(e.target as Node)) setOpen(false);
+
+    const handlePointer = (event: PointerEvent) => {
+      if (!badgeRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onKey);
+
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+
     return () => {
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
     };
   }, [open]);
 
@@ -375,8 +441,8 @@ function SkillBadge({ skill, accent }: { skill: Skill; accent: string }) {
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        onClick={() => setOpen((v) => !v)}
-        className="select-none whitespace-nowrap rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-[7px] text-[12px] font-medium text-slate-400 outline-none transition-[transform,background-color,border-color,color] duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.08] hover:bg-white/[0.04] hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-primary-light/60 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        onClick={() => setOpen((value) => !value)}
+        className="select-none whitespace-nowrap rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-[7px] text-[12px] font-medium text-slate-400 outline-none transition-[background-color,border-color,color] duration-150 hover:border-white/[0.08] hover:bg-white/[0.04] hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-primary-light/60 motion-reduce:transition-none"
       >
         {skill.name}
       </button>
@@ -387,26 +453,27 @@ function SkillBadge({ skill, accent }: { skill: Skill; accent: string }) {
             ref={tipRef}
             id={`tip-${skill.name}`}
             role="tooltip"
-            initial={{ opacity: 0, y: pos.below ? -6 : 6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.18, ease: EASE }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.12 }}
             className="pointer-events-none fixed z-[9999]"
             style={{
               left: pos.left,
               top: pos.top,
               width: `min(${TOOLTIP_W}px, calc(100vw - ${VIEWPORT_PAD * 2}px))`,
-              transformOrigin: pos.below ? 'top' : 'bottom',
             }}
           >
-            <div className="relative rounded-lg border border-white/[0.08] bg-[rgba(11,15,23,0.94)] px-3.5 py-2.5 shadow-xl shadow-black/30 backdrop-blur-xl">
+            <div className="relative rounded-lg border border-white/[0.08] bg-[#0b0f17] px-3.5 py-2.5 shadow-xl shadow-black/30">
               <p className={`mb-1 text-[11px] font-semibold ${accent}`}>
                 {skill.name}
               </p>
+
               <p className="text-[11px] leading-relaxed text-slate-400">
                 {skill.tip}
               </p>
+
               <span
-                className={`absolute h-2 w-2 -translate-x-1/2 rotate-45 border-white/[0.08] bg-[rgba(11,15,23,0.94)] ${
+                className={`absolute h-2 w-2 -translate-x-1/2 rotate-45 border-white/[0.08] bg-[#0b0f17] ${
                   pos.below
                     ? '-top-1 border-l border-t'
                     : '-bottom-1 border-b border-r'
@@ -419,13 +486,13 @@ function SkillBadge({ skill, accent }: { skill: Skill; accent: string }) {
         )}
     </>
   );
-}
+});
 
 /* -------------------------------------------------------------------------- */
-/*  Category card (shared by desktop stage and mobile list)                   */
+/* Category header                                                             */
 /* -------------------------------------------------------------------------- */
 
-function CategoryHeader({
+const CategoryHeader = memo(function CategoryHeader({
   category,
   index,
   size,
@@ -435,25 +502,34 @@ function CategoryHeader({
   size: 'sm' | 'lg';
 }) {
   const { title, icon: Icon, accent, accentBg, primary } = category;
-  const lg = size === 'lg';
+  const large = size === 'lg';
 
   return (
-    <div className={`flex items-start gap-3 ${lg ? 'mb-7 sm:gap-4' : 'mb-5'}`}>
+    <div
+      className={`flex items-start gap-3 ${
+        large ? 'mb-7 sm:gap-4' : 'mb-5'
+      }`}
+    >
       <div
         className={`flex shrink-0 items-center justify-center ${accentBg} ${
-          lg ? 'h-12 w-12 rounded-2xl sm:h-14 sm:w-14' : 'h-10 w-10 rounded-xl'
+          large
+            ? 'h-12 w-12 rounded-2xl sm:h-14 sm:w-14'
+            : 'h-10 w-10 rounded-xl'
         }`}
       >
-        <Icon size={lg ? 24 : 20} className={accent} />
+        <Icon size={large ? 24 : 20} className={accent} />
       </div>
 
       <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
         <span className="shrink-0 pt-1 font-mono text-[11px] font-medium tracking-wider text-primary-light/50">
           {String(index + 1).padStart(2, '0')}
         </span>
+
         <h3
           className={`font-display font-semibold leading-tight tracking-tight text-white ${
-            lg ? 'text-lg sm:text-xl lg:text-2xl' : 'text-base'
+            large
+              ? 'text-lg sm:text-xl lg:text-2xl'
+              : 'text-base'
           }`}
         >
           {title}
@@ -468,24 +544,28 @@ function CategoryHeader({
       )}
     </div>
   );
-}
+});
+
+/* -------------------------------------------------------------------------- */
+/* Desktop stage card                                                         */
+/* -------------------------------------------------------------------------- */
 
 const cardVariants: Variants = {
-  enter: (dir: number) => ({ opacity: 0, y: dir * 48, scale: 0.96 }),
-  center: { opacity: 1, y: 0, scale: 1 },
-  exit: (dir: number) => ({ opacity: 0, y: dir * -48, scale: 0.97 }),
-};
-
-const chipVariants: Variants = {
-  hidden: { opacity: 0, y: 6 },
-  show: (i: number) => ({
+  enter: (direction: number) => ({
+    opacity: 0,
+    y: direction * 24,
+  }),
+  center: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.12 + i * 0.015, duration: 0.25, ease: EASE },
+  },
+  exit: (direction: number) => ({
+    opacity: 0,
+    y: direction * -24,
   }),
 };
 
-function StageCard({
+const StageCard = memo(function StageCard({
   category,
   index,
   direction,
@@ -502,109 +582,140 @@ function StageCard({
     <motion.div
       custom={direction}
       variants={reduceMotion ? undefined : cardVariants}
-      initial={reduceMotion ? { opacity: 0 } : 'enter'}
-      animate={reduceMotion ? { opacity: 1 } : 'center'}
+      initial={reduceMotion ? false : 'enter'}
+      animate="center"
       exit={reduceMotion ? { opacity: 0 } : 'exit'}
       transition={{
-        opacity: { duration: 0.3, ease: 'easeOut' },
-        default: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+        duration: reduceMotion ? 0 : 0.25,
+        ease: EASE,
       }}
-      className={`pointer-events-auto absolute max-h-[calc(100dvh-140px)] w-full max-w-2xl overflow-y-auto rounded-3xl border bg-white/[0.025] p-6 shadow-2xl shadow-black/25 backdrop-blur-xl sm:p-8 lg:p-10 ${
+      className={`pointer-events-auto absolute max-h-[calc(100dvh-140px)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border bg-[#0b0f17]/95 p-6 shadow-xl shadow-black/20 sm:p-8 lg:p-10 ${
         primary ? accentBorder : 'border-white/[0.06]'
       }`}
     >
-      <CategoryHeader category={category} index={index} size="lg" />
+      <CategoryHeader
+        category={category}
+        index={index}
+        size="lg"
+      />
 
       <ul className="flex flex-wrap gap-1.5 sm:gap-2">
-        {skills.map((skill, i) => (
-          <motion.li
-            key={skill.name}
-            custom={i}
-            variants={chipVariants}
-            initial={reduceMotion ? false : 'hidden'}
-            animate="show"
-          >
+        {skills.map((skill) => (
+          <li key={skill.name}>
             <SkillBadge skill={skill} accent={accent} />
-          </motion.li>
+          </li>
         ))}
       </ul>
     </motion.div>
   );
-}
+});
 
 /* -------------------------------------------------------------------------- */
-/*  Desktop: sticky scroll stage (no wheel hijacking, no portals)             */
+/* Desktop stage: native scroll, no wheel interception                        */
 /* -------------------------------------------------------------------------- */
 
 function DesktopStage() {
   const reduceMotion = !!useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
+
   const total = categories.length;
+  const previousIndex = useRef(0);
+  const lockedRef = useRef(false);
 
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
-  const prevIndex = useRef(0);
-
   const [locked, setLocked] = useState(false);
 
   const { scrollY } = useScroll();
+
   const { scrollYProgress } = useScroll({
     target: stageRef,
     offset: ['start start', 'end end'],
   });
 
-  // The stage is "locked" while its tall spacer fills the viewport.
+  // Only update React state when the locked state actually changes.
   const checkLock = useCallback(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    setLocked(r.top <= 0 && r.bottom >= window.innerHeight);
+    const element = stageRef.current;
+    if (!element) return;
+
+    const rect = element.getBoundingClientRect();
+
+    const nextLocked =
+      rect.top <= 0 &&
+      rect.bottom >= window.innerHeight;
+
+    if (lockedRef.current === nextLocked) return;
+
+    lockedRef.current = nextLocked;
+    setLocked(nextLocked);
   }, []);
 
   useMotionValueEvent(scrollY, 'change', checkLock);
+
   useEffect(() => {
     checkLock();
-    window.addEventListener('resize', checkLock, { passive: true });
-    return () => window.removeEventListener('resize', checkLock);
+
+    window.addEventListener('resize', checkLock, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener('resize', checkLock);
+    };
   }, [checkLock]);
 
-  useMotionValueEvent(scrollYProgress, 'change', (p) => {
-    const next = Math.min(total - 1, Math.max(0, Math.floor(p * total)));
-    if (next === prevIndex.current) return;
-    setDirection(next > prevIndex.current ? 1 : -1);
-    prevIndex.current = next;
-    setActive(next);
+  // Change category only when the scroll reaches another category slice.
+  useMotionValueEvent(scrollYProgress, 'change', (progress) => {
+    const nextIndex = Math.min(
+      total - 1,
+      Math.max(0, Math.floor(progress * total)),
+    );
+
+    if (nextIndex === previousIndex.current) return;
+
+    setDirection(nextIndex > previousIndex.current ? 1 : -1);
+    previousIndex.current = nextIndex;
+    setActive(nextIndex);
   });
 
-  // Dots (and keyboard users) jump by scrolling to the matching slice.
-  const jumpTo = (index: number) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const top = stage.getBoundingClientRect().top + window.scrollY;
-    const range = stage.offsetHeight - window.innerHeight;
-    window.scrollTo({
-      top: top + (index / total) * range + 2,
-      behavior: reduceMotion ? 'auto' : 'smooth',
-    });
-  };
+  const jumpTo = useCallback(
+    (index: number) => {
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const stageTop =
+        stage.getBoundingClientRect().top + window.scrollY;
+
+      const scrollRange =
+        stage.offsetHeight - window.innerHeight;
+
+      const targetTop =
+        stageTop + (index / total) * scrollRange + 2;
+
+      window.scrollTo({
+        top: targetTop,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      });
+    },
+    [reduceMotion, total],
+  );
 
   const progressScale = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    mass: 0.4,
+    stiffness: 140,
+    damping: 32,
+    mass: 0.5,
   });
 
   return (
     <>
-      {/* Empty spacer: its height is the scroll distance of the whole stage. */}
       <div
         ref={stageRef}
         aria-hidden="true"
-        style={{ height: `${total * 100}vh` }}
+        style={{
+          height: `${total * 100}vh`,
+        }}
       />
 
-      {/* Fixed layer in <body>: pins to the screen no matter which ancestor
-          has overflow / transform set (which breaks position: sticky). */}
       {createPortal(
         <AnimatePresence>
           {locked && (
@@ -613,11 +724,17 @@ function DesktopStage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.15,
+              }}
               className="pointer-events-none fixed inset-0 z-40 flex h-screen w-screen items-center justify-center overflow-hidden px-6 lg:px-8"
             >
               <div className="relative flex h-full w-full max-w-2xl items-center justify-center pb-20 pt-16">
-                <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                <AnimatePresence
+                  initial={false}
+                  custom={direction}
+                  mode="sync"
+                >
                   <StageCard
                     key={categories[active].id}
                     category={categories[active]}
@@ -643,21 +760,23 @@ function DesktopStage() {
                 aria-label="Skill categories"
                 className="pointer-events-auto absolute bottom-7 left-1/2 flex -translate-x-1/2 items-center gap-2"
               >
-                {categories.map((c, i) => (
+                {categories.map((category, index) => (
                   <button
-                    key={c.id}
+                    key={category.id}
                     type="button"
-                    aria-label={c.title}
-                    aria-current={i === active}
-                    onClick={() => jumpTo(i)}
+                    aria-label={category.title}
+                    aria-current={index === active}
+                    onClick={() => jumpTo(index)}
                     className="group flex h-4 items-center outline-none"
                   >
                     <motion.span
                       animate={{
-                        width: i === active ? 32 : 6,
-                        opacity: i === active ? 1 : 0.35,
+                        width: index === active ? 32 : 6,
+                        opacity: index === active ? 1 : 0.35,
                       }}
-                      transition={{ duration: 0.35, ease: EASE }}
+                      transition={{
+                        duration: reduceMotion ? 0 : 0.2,
+                      }}
                       className="block h-1.5 rounded-full bg-primary-light group-hover:opacity-80 group-focus-visible:ring-2 group-focus-visible:ring-primary-light/60"
                     />
                   </button>
@@ -678,26 +797,48 @@ function DesktopStage() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Mobile: stacked cards                                                     */
+/* Mobile cards                                                                */
 /* -------------------------------------------------------------------------- */
 
-function MobileCard({ category, index }: { category: Category; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
+const MobileCard = memo(function MobileCard({
+  category,
+  index,
+}: {
+  category: Category;
+  index: number;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const inView = useInView(ref, {
+    once: true,
+    margin: '-40px',
+  });
+
   const reduceMotion = useReducedMotion();
   const { accent, accentBorder, primary, skills } = category;
 
   return (
     <motion.li
       ref={ref}
-      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.5, ease: EASE }}
-      className={`rounded-2xl border bg-white/[0.025] p-5 shadow-xl shadow-black/20 backdrop-blur-xl ${
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      animate={
+        inView
+          ? { opacity: 1, y: 0 }
+          : undefined
+      }
+      transition={{
+        duration: reduceMotion ? 0 : 0.3,
+        ease: EASE,
+      }}
+      className={`rounded-2xl border bg-[#0b0f17]/90 p-5 shadow-lg shadow-black/15 ${
         primary ? accentBorder : 'border-white/[0.06]'
       }`}
     >
-      <CategoryHeader category={category} index={index} size="sm" />
+      <CategoryHeader
+        category={category}
+        index={index}
+        size="sm"
+      />
+
       <ul className="flex flex-wrap gap-1.5">
         {skills.map((skill) => (
           <li key={skill.name}>
@@ -707,81 +848,127 @@ function MobileCard({ category, index }: { category: Category; index: number }) 
       </ul>
     </motion.li>
   );
-}
+});
 
 function MobileList() {
   return (
     <ul className="mt-4 flex flex-col gap-5 px-5 sm:px-6">
-      {categories.map((c, i) => (
-        <MobileCard key={c.id} category={c} index={i} />
+      {categories.map((category, index) => (
+        <MobileCard
+          key={category.id}
+          category={category}
+          index={index}
+        />
       ))}
     </ul>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Section                                                                   */
+/* Main Skills section                                                         */
 /* -------------------------------------------------------------------------- */
 
 export default function Skills() {
   const reduceMotion = useReducedMotion();
+
   const headerRef = useRef<HTMLDivElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
-  const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
-  const coreInView = useInView(coreRef, { once: true, margin: '-40px' });
+
+  const headerInView = useInView(headerRef, {
+    once: true,
+    margin: '-60px',
+  });
+
+  const coreInView = useInView(coreRef, {
+    once: true,
+    margin: '-40px',
+  });
+
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  const reveal = (inView: boolean, from: { x?: number; y?: number }, delay = 0) => ({
-    initial: reduceMotion ? false : { opacity: 0, ...from },
-    animate: inView ? { opacity: 1, x: 0, y: 0 } : undefined,
-    transition: { duration: 0.7, delay, ease: EASE },
+  const reveal = (
+    inView: boolean,
+    from: { x?: number; y?: number },
+    delay = 0,
+  ) => ({
+    initial: reduceMotion
+      ? false
+      : { opacity: 0, ...from },
+    animate: inView
+      ? { opacity: 1, x: 0, y: 0 }
+      : undefined,
+    transition: {
+      duration: reduceMotion ? 0 : 0.45,
+      delay: reduceMotion ? 0 : delay,
+      ease: EASE,
+    },
   });
 
   return (
-    <section id="skills" className="relative py-24 lg:py-32">
+    <section
+      id="skills"
+      className="relative py-24 lg:py-32"
+    >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-dark via-surface/20 to-dark" />
-      <div className="pointer-events-none absolute -right-64 top-1/3 h-[400px] w-[400px] rounded-full bg-primary/[0.012] blur-[120px]" />
+
+      <div className="pointer-events-none absolute -right-64 top-1/3 h-[400px] w-[400px] rounded-full bg-primary/[0.012] blur-[100px]" />
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div ref={headerRef}>
-          <motion.div {...reveal(headerInView, { x: -60 })} className="mb-5">
+          <motion.div
+            {...reveal(headerInView, { x: -24 })}
+            className="mb-5"
+          >
             <span className="mb-3 inline-block font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
               {'// Skills'}
             </span>
+
             <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Skills &amp; Technologies
             </h2>
           </motion.div>
 
           <motion.p
-            {...reveal(headerInView, { x: 60 }, 0.12)}
+            {...reveal(headerInView, { x: 24 }, 0.08)}
             className="mb-12 max-w-2xl text-[15px] text-slate-400 lg:mb-14"
           >
-            The tools and technologies I use to build intelligent, scalable, and
-            practical digital solutions.
+            The tools and technologies I use to build intelligent,
+            scalable, and practical digital solutions.
           </motion.p>
         </div>
 
-        <div ref={coreRef} className="mb-14 lg:mb-16">
+        <div
+          ref={coreRef}
+          className="mb-14 lg:mb-16"
+        >
           <motion.p
-            {...reveal(coreInView, { y: 20 })}
+            {...reveal(coreInView, { y: 12 })}
             className="mb-5 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-600"
           >
             {'// Core Expertise'}
           </motion.p>
 
           <motion.div
-            {...reveal(coreInView, { y: 30 }, 0.1)}
+            {...reveal(coreInView, { y: 16 }, 0.05)}
             className="-mx-5 flex flex-col gap-3 sm:-mx-6 lg:-mx-8"
           >
             <Marquee speed={28}>
               {coreExpertise.map((item) => (
-                <ExpertisePill key={item.label} {...item} variant="strong" />
+                <ExpertisePill
+                  key={item.label}
+                  {...item}
+                  variant="strong"
+                />
               ))}
             </Marquee>
+
             <Marquee speed={22} reverse>
               {[...coreExpertise].reverse().map((item) => (
-                <ExpertisePill key={item.label} {...item} variant="soft" />
+                <ExpertisePill
+                  key={item.label}
+                  {...item}
+                  variant="soft"
+                />
               ))}
             </Marquee>
           </motion.div>
